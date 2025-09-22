@@ -2,6 +2,44 @@
 @tailwind components;
 @tailwind utilities;
 
-h1{
-    font-size: 5rem;
+/* ----- ----- ----- Base ----- ----- ----- */
+body{
+    /* no scroll */
+    @apply md:overflow-hidden;
 }
+
+#app{
+    /* ocupa todo el alto de la pagina */
+    @apply flex flex-col min-h-[100vh];
+}
+
+#app > main {
+    /* ocupa todo el espacio disponible del flex de arriba, cosa para que el footer quede al fondo */
+    /* meto el scroll aca, para que siempre se vea el header y el footer desde md */
+    @apply min-h-[80vh] flex-grow md:overflow-y-auto;
+}
+
+nav {
+  @apply bg-primary px-5 py-3 shadow-md;
+}
+
+nav ul {
+  @apply list-none flex gap-5 m-0 p-0 justify-center items-center;
+}
+
+nav ul li a {
+  @apply text-gray-300 no-underline font-semibold px-3 py-2 rounded transition-colors duration-300 font-sans;
+}
+
+nav ul li a:hover {
+  @apply bg-primary;
+}
+
+nav ul li a.router-link-exact-active {
+  @apply bg-primary text-white pointer-events-none;
+}
+
+footer{
+    @apply bg-primary py-5 text-white text-center;
+}
+
