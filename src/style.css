@@ -28,15 +28,12 @@ nav ul {
 }
 
 nav ul li a {
-  @apply text-gray-300 no-underline font-semibold px-3 py-2 rounded transition-colors duration-300 font-sans;
+  @apply text-gray-300 no-underline font-semibold px-3 py-2 rounded transition-colors duration-300 font-sans cursor-pointer;
 }
 
-nav ul li a:hover {
-  @apply bg-primary;
-}
-
+nav ul li a:hover,
 nav ul li a.router-link-exact-active {
-  @apply bg-primary text-white pointer-events-none;
+  @apply text-white;
 }
 
 footer{
