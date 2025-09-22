@@ -1,5 +1,5 @@
 <template>
-    <h1>Hola Mundo! soy Home</h1>
+    <h1 class="text-3xl">Hola Mundo! soy Home</h1>
 </template>
 <script>
     export default{
