@@ -40,7 +40,7 @@
 </template>
 
 <script>
-import supabase from '../services/supabase'
+import {register} from '../services/auth';
 
 export default {
     name: 'Register',
@@ -54,25 +54,18 @@ export default {
         }
     },
     methods: {
-        /** TODO: comentar, es void */
+        /**
+         * Registra un nuevo usuario usando el servicio de supabase.
+         */
         async register() {
             this.errorMessage = '';
             this.successMessage = '';
             this.loading = true;
             try {
-                const { data, error } = await supabase.auth.signUp({
-                    email: this.email,
-                    password: this.password,
-                })
-
-                if (error) {
-                    this.errorMessage = error.message;
-                } else {
-                    this.successMessage = '¡Registro exitoso! Revisa tu email para verificar la cuenta.';
-                    // console.log('User:', data.user);
-                }
+                await register(this.email, this.password)
+                this.successMessage = '¡Registro exitoso! Revisa tu email para verificar la cuenta.';
             } catch (err) {
-                this.errorMessage = 'Error inesperado: ' + err.message;
+                this.errorMessage = 'Error: ' + err.message;
             } finally {
                 this.loading = false
             }

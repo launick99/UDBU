@@ -35,13 +35,12 @@
 
 
             <p v-if="errorMessage" class="mt-4 text-red-600">{{ errorMessage }}</p>
-            <p v-if="successMessage" class="mt-4 text-green-600">{{ successMessage }}</p>
         </form>
     </div>
 </template>
 
 <script>
-import supabase from '../services/supabase'
+import {login} from '../services/auth';
 
 export default {
     name: 'Login',
@@ -51,31 +50,20 @@ export default {
             password: '',
             loading: false,
             errorMessage: '',
-            successMessage: '',
         }
     },
     methods: {
         /** TODO: comentar, es void */
         async login() {
             this.errorMessage = '';
-            this.successMessage = '';
             this.loading = true;
             try {
-                const { error, data } = await supabase.auth.signInWithPassword({
-                    email: this.email,
-                    password: this.password,
-                })
-
-                if (error) {
-                    this.errorMessage = error.message;
-                } else {
-                    this.successMessage = '¡Ingreso exitoso!';
-                    window.location.reload();
-                }
+                await login(this.email, this.password)
+                this.$router.push('/perfil');
             } catch (err) {
-                this.errorMessage = 'Error inesperado: ' + err.message;
+                this.errorMessage = 'Error: ' + err.message;
             } finally {
-                this.loading = false;
+                this.loading = false
             }
         },
     },
