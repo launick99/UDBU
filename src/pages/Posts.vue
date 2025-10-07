@@ -17,48 +17,45 @@
 </template>
 
 <script>
-import supabase from '../services/supabase';
+    import { createPost, fetchAllPosts } from '../services/posts';
+    import { subscribeToAuthStateChanges } from '../services/auth';
 
-export default {
-    name: "Posts",
-    data() {
-        return {
-            newPost: "",
-            posts: [],
-        };
-    },
-    methods: {
-        async addPost() {
-            const trimmed = this.newPost.trim();
-            if (trimmed !== "") {
-                const { data, error } = await supabase
-                    .from('publicaciones')
-                    .insert([{ content: trimmed }]);
-                
-                if (error) {
-                    console.error("Error al publicar:", error);
-                    return;
+    export default {
+        name: "Posts",
+        data() {
+            return {
+                newPost: "",
+                posts: [],
+                currentUser: null,
+            };
+        },
+        methods: {
+            async addPost() {
+                try {
+                    if (!this.currentUser?.id) {
+                        throw new Error("Debes iniciar sesión para publicar.");
+                    }
+
+                    const newPub = await createPost(this.newPost, this.currentUser.id);
+                    this.posts.unshift(newPub); // Añadir al principio
+                    this.newPost = "";
+                } catch (error) {
+                    console.error(error.message);
                 }
-                this.newPost = "";
-
-                this.posts.push({ content: trimmed });
-            }
+            },
+            async fetchPosts() {
+                try {
+                    this.posts = await fetchAllPosts();
+                } catch (error) {
+                    console.error(error.message);
+                }
+            },
         },
-        async fetchPosts() {
-            const { data, error } = await supabase
-                .from('publicaciones')
-                .select('*')
-                .order('created_at', { ascending: false });
-
-            if (error) {
-                console.error("Error al obtener publicaciones:", error);
-                return;
-            }
-            this.posts = data;
+        mounted() {
+            this.fetchPosts();
+            subscribeToAuthStateChanges((user) => {
+                this.currentUser = user;
+            });
         },
-    },
-    mounted() {
-        this.fetchPosts();
-    },
-};
+    };
 </script>

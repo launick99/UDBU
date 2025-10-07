@@ -7,8 +7,8 @@ import Login from "../pages/Login.vue";
 import Register from "../pages/Register.vue";
 
 // Importaciones de páginas de error
-import Er403 from "../pages/Er403.vue";
-import Er404 from "../pages/Er404.vue";
+import Er403 from "../pages/Errors/Er403.vue";
+import Er404 from "../pages/Errors/Er404.vue";
 
 // Importación de servicios
 import { subscribeToAuthStateChanges } from "../services/auth";
@@ -55,7 +55,7 @@ subscribeToAuthStateChanges((UserState) => user = UserState);
  * Si la ruta requiere autenticación y el usuario no está autenticado, redirige a /403.
  */
 router.beforeEach((to, from) => {
-    if (to.meta.requiresAuth && !user.id) {
+    if (to.meta.requiresAuth && user.id === null) {
         return { path: '/403' };
     }
 });
