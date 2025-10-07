@@ -20,7 +20,7 @@ body{
 }
 
 nav {
-  @apply bg-primary px-5 py-3 shadow-md;
+  @apply bg-primary px-5 py-3 shadow-lg;
 }
 
 nav ul {
@@ -40,3 +40,31 @@ footer{
     @apply bg-primary py-5 text-white text-center;
 }
 
+.background {
+    background-image: url('../assets/img/debbies_blue_umbrella.jpg');
+    @apply bg-gray-100 h-[80vh] bg-cover bg-center bg-fixed;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-home {
+    @apply 
+        absolute top-3/4 left-1/2 transform -translate-x-1/2 -translate-y-1/2
+        px-6 py-3 bg-teal-800 text-white rounded-sm shadow-lg
+        hover:bg-teal-700 transition duration-300 z-10;
+}
+
+.rain {
+    @apply absolute top-0 left-0 w-full h-full pointer-events-none;
+    background-image: url('../assets/img/lluvia.png');
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+    opacity: 0.25;
+    animation: lluvia 1s linear infinite;
+}
+
+@keyframes lluvia {
+    100% { background-position: center top; } /* no se que hice mal, pero se veia al reves xD*/
+    0% { background-position: center bottom; }
+}

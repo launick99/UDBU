@@ -1,6 +1,10 @@
 <template>
     <div class="background">
-
+        <div class="rain"></div>
+        <router-link to="/login" class="btn-home flex items-center justify-center gap-2">
+            <i class="fa-solid fa-right-to-bracket"></i>
+            Iniciar Sesion
+        </router-link>
     </div>
 </template>
 <script>
@@ -17,6 +21,3 @@
     But the two people seated beneath a large blue umbrella, a young man and a young woman, are safe and dry. 
     They are not kissing, but their heads are close together. They appear to be in deep conversation.”
 -->
-
-<style scoped>
-</style>
