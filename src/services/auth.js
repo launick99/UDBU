@@ -1,4 +1,5 @@
 import supabase from './supabase';
+import { createUserProfile, getUserProfileById } from './user-profile';
 
 /**
  * Objeto que representa al usuario autenticado.
@@ -7,12 +8,19 @@ import supabase from './supabase';
 let user = {
     id: null,
     email: null,
+    display_name: null,
+    bio: null
 }
 
 /**
  * Lista de observadores (callbacks) que serán notificados cuando cambie el estado del usuario.
  */
 let observers = [];
+
+//Cargar datos de localStorage
+if(localStorage.getItem('user')){
+    user = JSON.parse(localStorage.getItem('user'));
+}
 
 // Cargar el usuario actual al iniciar el servicio
 loadCurrentUser();
@@ -28,7 +36,16 @@ async function loadCurrentUser() {
         // console.error('Get current user error:', error.message);
         return;
     }
-    setUser(data);
+
+    setUser({
+        id: data.user.id,
+        email: data.user.email
+    });
+    loadUserFullProfile();
+}
+
+async function loadUserFullProfile(){
+    setUser( await getUserProfileById(user.id) );
 }
 
 /**
@@ -38,13 +55,25 @@ async function loadCurrentUser() {
  * @param {string} password - Contraseña del usuario.
  */
 export async function register(email, password) {
-    const {data, error} = await supabase.auth.signUp({email, password});
-    if (error) {
-        // console.error('Registration error:', error.message);
-        throw new Error( error.message);
+    try {
+        const {data, error} = await supabase.auth.signUp({email, password});
+        if (error) {
+            // console.error('Registration error:', error.message);
+            throw new Error( error.message);
+        }
+
+        
+        //crear el perfil
+        await createUserProfile({ id: data.user.id, email: data.user.email });
+
+        setUser({
+            id: data.user.id,
+            email: data.user.email
+        });
+        // console.log('usuario registrado exitosamente:', data);
+    } catch (error) {
+        throw new Error(error.message);
     }
-    setUser(data);
-    // console.log('usuario registrado exitosamente:', data);
 }
 
 /**
@@ -59,8 +88,12 @@ export async function login(email, password) {
     if (error) {
         // console.error('Login error:', error.message);
         throw new Error( error.message );
-    }
-    setUser(data);
+    }   
+    setUser({
+        id: data.user.id,
+        email: data.user.email
+    });
+    loadUserFullProfile();
 }
 
 /**
@@ -93,7 +126,7 @@ export async function subscribeToAuthStateChanges(callback) {
  * @param {(userState: {id: String|null, email: String|null}) => void} callback - Callback a notificar.
  */
 function notify(callback) {
-    callback(...user); 
+    callback({...user}); 
 }
 
 /**
@@ -108,5 +141,10 @@ function notifyAll() {
  */
 function setUser(data){
     user = { ...user, ...data };
+    if(user.id){
+        localStorage.setItem('user', JSON.stringify(user));
+    }else{
+        localStorage.removeItem('user');
+    }
     notifyAll();
 }

@@ -34,7 +34,6 @@
             </div>
 
             <p v-if="errorMessage" class="mt-4 text-red-600">{{ errorMessage }}</p>
-            <p v-if="successMessage" class="mt-4 text-green-600">{{ successMessage }}</p>
         </form>
     </div>
 </template>
@@ -59,11 +58,10 @@ export default {
          */
         async register() {
             this.errorMessage = '';
-            this.successMessage = '';
             this.loading = true;
             try {
-                await register(this.email, this.password)
-                this.successMessage = '¡Registro exitoso! Revisa tu email para verificar la cuenta.';
+                await register(this.email, this.password);
+                this.$router.push('/perfil');
             } catch (err) {
                 this.errorMessage = 'Error: ' + err.message;
             } finally {

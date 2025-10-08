@@ -12,6 +12,7 @@ import Er404 from "../pages/Errors/Er404.vue";
 
 // Importación de servicios
 import { subscribeToAuthStateChanges } from "../services/auth";
+import Perfil from "../pages/Perfil.vue";
 
 /**
  * Definición de rutas de la aplicación.
@@ -19,13 +20,13 @@ import { subscribeToAuthStateChanges } from "../services/auth";
  * - La ruta '*' redirige a 404 si no se encuentra la ruta solicitada.
  */
 const routes = [
-    { component: Home,      path: '/' },
-    { component: Login,     path: '/login' },
-    { component: Register,  path: '/register' },
-    { component: Posts,     path: '/post',    meta: { requiresAuth: true } },
-    { component: Posts,     path: '/perfil',  meta: { requiresAuth: true } },
-    { component: Er403,     path: '/403' },
-    { component: Er404,     path: '/404' },
+    { component: Home,      path: '/',          meta: { guest: true }           },
+    { component: Login,     path: '/login',     meta: { guest: true }           },
+    { component: Register,  path: '/register',  meta: { guest: true }           },
+    { component: Posts,     path: '/post',      meta: { requiresAuth: true }    },
+    { component: Perfil,    path: '/perfil',    meta: { requiresAuth: true }    },
+    { component: Er403,     path: '/403'                                        },
+    { component: Er404,     path: '/404'                                        },
     // Ruta catch-all para 404
     { path: '/:pathMatch(.*)*', redirect: '/404' }
 ];
@@ -55,6 +56,9 @@ subscribeToAuthStateChanges((UserState) => user = UserState);
  * Si la ruta requiere autenticación y el usuario no está autenticado, redirige a /403.
  */
 router.beforeEach((to, from) => {
+    if (to.meta.guest && user.id !== null) {
+        return { path: '/post' };
+    }
     if (to.meta.requiresAuth && user.id === null) {
         return { path: '/403' };
     }

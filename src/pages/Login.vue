@@ -1,6 +1,6 @@
 <template>
     <div class="max-w-sm mx-auto mt-10 p-6 border rounded shadow">
-        <h2 class="text-2xl font-bold mb-6 text-center">Login</h2>
+        <h2 class="text-2xl font-bold mb-6 text-center">Iniciar Sesion</h2>
 
         <form @submit.prevent="login">
             <label class="block mb-2 font-semibold" for="email">Email</label>
