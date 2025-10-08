@@ -10,6 +10,8 @@
     import AppFooter from './components/AppFooter.vue';
     import { subscribeToAuthStateChanges } from './services/auth';
 
+    let unsubscribe = () => {};
+
     export default {
         name: 'App',
         components: {AppNavbar, AppFooter},
@@ -22,9 +24,12 @@
             }
         },
         mounted(){
-            subscribeToAuthStateChanges( (userState) => {
+            unsubscribe = subscribeToAuthStateChanges( (userState) => {
                 this.user = userState;
-    });
+            });
+        },
+        unmounted(){
+            unsubscribe();
         }
     }
 </script>

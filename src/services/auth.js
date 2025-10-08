@@ -1,5 +1,5 @@
 import supabase from './supabase';
-import { createUserProfile, getUserProfileById } from './user-profile';
+import { createUserProfile, getUserProfileById, updateUserProfile } from './user-profile';
 
 /**
  * Objeto que representa al usuario autenticado.
@@ -109,16 +109,38 @@ export async function logout() {
     setUser({id: null, email: null});
 }
 
+/**
+ * 
+ * @param {{display_name?: String|null, bio?: String|null}} data 
+ */
+
+export async function updateAuthUser(data){
+    try {
+        await updateUserProfile(user.id, data);
+        setUser({
+            display_name: data.display_name ?? user.display_name,
+            bio: data.bio ?? user.bio
+        });
+    } catch (error) {
+        throw new Error(error.message);
+    }
+}
+
 /* ---- Observer ---- */
 
 /**
  * Suscribe un callback para ser notificado cuando cambie el estado del usuario.
  * El callback se ejecuta inmediatamente con el estado actual.
  * @param {(userState: {id: String|null, email: String|null}) => void} callback - Función a ejecutar cuando cambie el usuario.
+ * @returns { {} => void } - Función para desuscribir el callback.
  */
-export async function subscribeToAuthStateChanges(callback) {
+export function subscribeToAuthStateChanges(callback) {
     observers.push(callback);
     notify(callback);
+
+    return () => { 
+        observers = observers.filter(obs => obs !== callback); 
+    };
 }
 
 /**

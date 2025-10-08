@@ -9,7 +9,9 @@
                             <h2 class="text-xl font-bold">{{ user.display_name }}</h2>
                             <p class="text-gray-700">{{ user.email }}</p>
                             <div class="mt-6 flex flex-wrap gap-4 justify-center">
-                                <a href="#" class="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded">Editar</a>
+                                <RouterLink to="/perfil/editar" class="bg-primary hover:bg-blue-600 text-white py-2 px-4 rounded">
+                                    Editar
+                                </RouterLink>
                             </div>
                         </div>
                         <hr class="my-6 border-t border-gray-300">
@@ -29,10 +31,11 @@
 </template>
 
 <script>
-import { subscribeToAuthStateChanges } from '../services/auth';
+    import { subscribeToAuthStateChanges } from '../services/auth';
 
+    let unsubscribe = () => {};
     export default {
-        name: "Perfil",
+        name: "Profile",
         data(){
             return {
                 user: {
@@ -44,7 +47,12 @@ import { subscribeToAuthStateChanges } from '../services/auth';
             };
         },
         mounted(){
-            subscribeToAuthStateChanges(async userState => this.user = userState);
+            unsubscribe = subscribeToAuthStateChanges( (userState) => {
+                this.user = userState;
+            });
+        },
+        unmounted(){
+            unsubscribe();
         }
     };
 </script>

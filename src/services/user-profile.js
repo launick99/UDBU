@@ -15,13 +15,12 @@ export async function getUserProfileById(id){
     if(error){
         // console.error('Error al traer el id del usuario:', error.message);
         throw new Error(error.message);
-    }
-
+    }    
     return data;
 }
 
 /**
- * 
+ * Crea El Perfil del usuario.
  * @param {{id: String, email: String, display_name?: String|null, bio?: String|null}} data 
  */
 export async function createUserProfile(data) {
@@ -29,10 +28,24 @@ export async function createUserProfile(data) {
         .from('user_profile')
         .insert(data);
     if (error) {
+        // console.error('Error al actualizar el perfil:', error.message);
         throw new Error(error.message);
     }
 }
 
-export async function updateUserProfile(data) {
-
+/**
+ * Actualiza El Perfil del usuario.
+ * 
+ * @param {String} id 
+ * @param {{display_name?: String|null, bio?: String|null}} data 
+ */
+export async function updateUserProfile(id, data) {    
+    const { error } = await supabase
+        .from('user_profile')
+        .update(data)
+        .eq('id', id);
+    if (error) {
+        // console.error('Error al actualizar el perfil:', error.message);
+        throw new Error(error.message);
+    }
 }
