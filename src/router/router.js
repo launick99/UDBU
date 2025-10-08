@@ -5,6 +5,7 @@ import Home from "../pages/Home.vue";
 import Posts from "../pages/Posts.vue";
 import Login from "../pages/Login.vue";
 import Register from "../pages/Register.vue";
+import Perfil from "../pages/Profile.vue";
 
 // Importaciones de páginas de error
 import Er403 from "../pages/Errors/Er403.vue";
@@ -12,7 +13,6 @@ import Er404 from "../pages/Errors/Er404.vue";
 
 // Importación de servicios
 import { subscribeToAuthStateChanges } from "../services/auth";
-import Perfil from "../pages/Perfil.vue";
 
 /**
  * Definición de rutas de la aplicación.
@@ -54,6 +54,7 @@ subscribeToAuthStateChanges((UserState) => user = UserState);
 /**
  * Guard global de navegación.
  * Si la ruta requiere autenticación y el usuario no está autenticado, redirige a /403.
+ * Si la ruta es para invitados y el usuario está autenticado, redirige a /post.
  */
 router.beforeEach((to, from) => {
     if (to.meta.guest && user.id !== null) {
