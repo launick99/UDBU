@@ -1,78 +1,63 @@
 import supabase from './supabase';
 
-/**
- * Inserta una nueva publicación en la base de datos.
- * 
- * @param {string} content - El contenido de la publicación.
- * @param {string} user_id - ID del usuario que crea la publicación.
- * @returns {Promise<Object>} - Retorna el objeto de publicación insertado.
- * @throws {Error}
- */
-export async function createPost(content, user_id) {
-    const trimmed = content.trim();
-
-    if (trimmed === '') {
-        throw new Error('El contenido no puede estar vacío.');
-    }
-
+export async function postGlobalnNewPost({sender_id, content}) {
     const { data, error } = await supabase
-        .from('publicaciones')
-        .insert([{ content: trimmed, user_id }])
-        .select()
-        .single();
+        .from('posts')
+        .insert({
+            sender_id: sender_id,
+            content: content
+        });
 
     if (error) {
+        // console.error('Error al crear publicación:', error.message);
         throw new Error(`Error al crear publicación: ${error.message}`);
     }
-
-    return data;
 }
 
-/**
- * Obtiene todas las publicaciones de la base de datos, ordenadas por fecha descendente.
- * 
- * @returns {Promise<Array>} - Lista de publicaciones.
- * @throws {Error}
- */
-export async function fetchAllPosts() {
+export async function fetchGlobalPost() {
     const { data, error } = await supabase
-        .from('publicaciones')
-        .select(`
-            id,
-            content,
-            created_at,
-            user_id,
-            users: user_id (
-                id,
-                email
-            )
-        `)
+        .from('posts')
+        .select('*')
         .order('created_at', { ascending: false });
-
+    
     if (error) {
+        // console.error('Error al obtener publicaciones:', error.message);
         throw new Error(`Error al obtener publicaciones: ${error.message}`);
     }
 
     return data;
 }
 
-    /**
-     * Obtiene todas las publicaciones de un usuario específico.
-     * 
-     * @param {string} userId - ID del usuario.
-     * @returns {Promise<Array>} - Lista de publicaciones del usuario.
-     * @throws {Error}
-     */
-export async function fetchPostsByUser(userId) {
+export async function fetchUserPost(id) {
     const { data, error } = await supabase
-        .from('publicaciones')
+        .from('posts')
         .select('*')
-        .eq('user_id', userId)
+        .eq('sender_id', id)
         .order('created_at', { ascending: false });
-
+    
     if (error) {
-        throw new Error(`Error al obtener publicaciones del usuario: ${error.message}`);
+        // console.error('Error al obtener publicaciones:', error.message);
+        throw new Error(`Error al obtener publicaciones: ${error.message}`);
     }
 
     return data;
+}
+
+export function subscribeToGlobalPostNewPosts(callback){
+    let postsChannel = supabase.channel('posts');
+
+    postsChannel.on(
+        'postgres_changes',
+        //evento, esquema y tabla
+        { event: 'INSERT', schema: 'public', table: 'posts' },
+        (payload) => {
+            callback(payload.new);
+        }
+    );
+    
+    postsChannel.subscribe();
+
+    return () => {
+        postsChannel.unsubscribe();
+    }
 }

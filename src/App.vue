@@ -1,9 +1,11 @@
 <template>
     <AppNavbar :user="user"></AppNavbar>
-    <main class="main">
-        <Router-view></Router-view>
-    </main>
-    <AppFooter></AppFooter>
+    <div class="main-container">
+        <main>
+            <Router-view></Router-view>
+        </main>
+        <AppFooter></AppFooter>
+    </div>
 </template>
 <script>
     import AppNavbar from './components/AppNavbar.vue';

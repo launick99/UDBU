@@ -4,8 +4,8 @@
             <div class="flex justify-between items-center">
                 <!-- Logo -->
                 <router-link to="/" class="flex items-center gap-2">
-                    <img class="h-10 object-cover" src="../../assets/img/logo.png" alt="Store Logo">
-                    <h1 class="text-white font-semibold text-lg sm:text-xl">Bajo la Paraguas azul de Debbie</h1>
+                    <img class="h-10 object-cover" src="../../assets/img/logo.png" title="Bajo la Paraguas azul de Debbie" alt="Bajo la Paraguas azul de Debbie Logo">
+                    <h1 class="sr-only md:not-sr-only text-white font-semibold text-lg sm:text-xl">Bajo la Paraguas azul de Debbie</h1>
                 </router-link>
                 <div class="sm:hidden">
                     <button @click="mobileMenuOpen = !mobileMenuOpen" class="text-white focus:outline-none">
@@ -16,6 +16,9 @@
                     <template v-if="user?.id">
                         <li>
                             <router-link to="/post">Home</router-link>
+                        </li>
+                        <li>
+                            <router-link to="/perfil">Mi Perfil</router-link>
                         </li>
                         <li>
                             <a @click="handleLogout" class="cursor-pointer">Cerrar sesión</a>

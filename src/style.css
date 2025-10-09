@@ -5,18 +5,22 @@
 /* ----- ----- ----- Base ----- ----- ----- */
 body{
     /* no scroll */
-    @apply md:overflow-hidden;
+    @apply h-[100vh] overflow-hidden;
 }
 
 #app{
     /* ocupa todo el alto de la pagina */
-    @apply flex flex-col min-h-[100vh];
+    @apply h-[100vh] overflow-y-auto sm:overflow-hidden;
 }
 
-#app > main {
+#app .main-container {
     /* ocupa todo el espacio disponible del flex de arriba, cosa para que el footer quede al fondo */
-    /* meto el scroll aca, para que siempre se vea el header y el footer desde md */
-    @apply min-h-[80vh] flex-grow md:overflow-y-auto;
+    /* meto el scroll aca, para que siempre se vea el header y el footer desde sm */
+    @apply h-[100vh] flex flex-col overflow-hidden sm:overflow-y-auto;
+
+    main{
+        @apply h-full;
+    }
 }
 
 nav {
@@ -39,6 +43,8 @@ nav ul li a.router-link-exact-active {
 footer{
     @apply bg-primary py-5 text-white text-center;
 }
+
+/* Home */
 
 .background {
     background-image: url('../assets/img/debbies_blue_umbrella.jpg');
@@ -67,4 +73,46 @@ footer{
 @keyframes lluvia {
     100% { background-position: center top; } /* no se que hice mal, pero se veia al reves xD*/
     0% { background-position: center bottom; }
+}
+
+
+/* Post */
+
+/* HTML: <div class="loader"></div> */
+.loader {
+    width: 50px;
+    aspect-ratio: 1;
+    display: grid;
+    border: 4px solid #0000;
+    border-radius: 50%;
+    border-color: #ccc #0000;
+    animation: l16 1s infinite linear;
+}
+.loader::before,
+.loader::after {    
+    content: "";
+    grid-area: 1/1;
+    margin: 2px;
+    border: inherit;
+    border-radius: 50%;
+}
+.loader::before {
+    border-color: #1277ba #003558;
+    animation: inherit; 
+    animation-duration: .5s;
+    animation-direction: reverse;
+}
+.loader::after {
+    margin: 8px;
+}
+@keyframes l16 { 
+    100%{transform: rotate(1turn)}
+}
+
+.form-textarea{
+    @apply 
+        flex-1 bg-gray-100 rounded-xl px-4 py-2 text-sm 
+        focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white
+        resize-none;
+        field-sizing: content; /* quiza falle en firefox */
 }

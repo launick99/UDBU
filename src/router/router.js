@@ -6,6 +6,7 @@ import Posts from "../pages/Posts.vue";
 import Login from "../pages/Login.vue";
 import Register from "../pages/Register.vue";
 import Profile from "../pages/Profile.vue";
+import Usuario from "../pages/Usuario.vue";
 import ProfileEdit from "../pages/ProfileEdit.vue";
 
 // Importaciones de páginas de error
@@ -21,14 +22,15 @@ import { subscribeToAuthStateChanges } from "../services/auth";
  * - La ruta '*' redirige a 404 si no se encuentra la ruta solicitada.
  */
 const routes = [
-    { component: Home,              path: '/',                  meta: { guest: true }                   },
-    { component: Login,             path: '/login',             meta: { guest: true }                   },
-    { component: Register,          path: '/register',          meta: { guest: true }                   },
-    { component: Posts,             path: '/post',              meta: { requiresAuth: true }            },
-    { component: Profile,           path: '/perfil',            meta: { requiresAuth: true }            },
-    { component: ProfileEdit,       path: '/perfil/editar',     meta: { requiresAuth: true }            },
-    { component: Er403,             path: '/403'                                                        },
-    { component: Er404,             path: '/404'                                                        },
+    { component: Home,              path: '/',                      meta: { guest: true }           },
+    { component: Login,             path: '/login',                 meta: { guest: true }           },
+    { component: Register,          path: '/register',              meta: { guest: true }           },
+    { component: Posts,             path: '/post',                  meta: { requiresAuth: true }    },
+    { component: Profile,           path: '/perfil/',               meta: { requiresAuth: true }    },
+    { component: Usuario,           path: '/usuario/:id?',          meta: { requiresAuth: true }    },
+    { component: ProfileEdit,       path: '/perfil/editar',         meta: { requiresAuth: true }    },
+    { component: Er403,             path: '/403'                                                    },
+    { component: Er404,             path: '/404'                                                    },
     // Ruta catch-all para 404
     { path: '/:pathMatch(.*)*', redirect: '/404' }
 ];

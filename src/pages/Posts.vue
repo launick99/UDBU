@@ -1,61 +1,82 @@
 <template>
-    <div class="container mx-auto">
-        <h2 class="text-xl font-bold mb-4">Publicaciones</h2>
-        <div class="posts">
-            <div v-for="(post, index) in posts" :key="index" class="bg-green-100 p-4 my-2 rounded shadow">
-                {{ post.content }}
+    <div class="container mx-auto py-8">
+        <!-- form para crear nuevo post -->
+        <form @submit.prevent="handleSubmit" class="post-form">
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4 mb-4">
+                <div class="flex items-center">
+                    <textarea 
+                        class="form-textarea" 
+                        placeholder="¿Qué estás pensando?"
+                        type="text" 
+                        v-model="newPost.content"
+                    ></textarea>
+                </div>
+                <hr class="border-gray-300 my-2">
+                <button type="submit" class="text-white text-center bg-primary hover:bg-blue-600 p-2 w-full rounded-sm">Publicar</button>
             </div>
-        </div>
-
-        <form @submit.prevent="addPost" class="mt-4 flex gap-2">
-            <input v-model="newPost" type="text" placeholder="Escribe una publicación..." class="flex-grow p-2 border rounded" />
-            <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
-                Publicar
-            </button>
         </form>
+        <!-- lista de posts -->
+        <div class="post-list bg-white rounded-xl shadow-sm border border-gray-200 p-4 mb-4">
+            <div v-if="posts.length === 0">
+                <div class="loader"></div>
+            </div>
+            <Post
+                v-for="post in posts"
+                :key="post.id"
+                :post="post"
+            />
+        </div>
     </div>
 </template>
 
+
 <script>
-    import { createPost, fetchAllPosts } from '../services/posts';
+    import { fetchGlobalPost, postGlobalnNewPost, subscribeToGlobalPostNewPosts } from '../services/posts';
     import { subscribeToAuthStateChanges } from '../services/auth';
+    import Post from '../components/Post.vue';
+
+    let unsubscribeFromAuth = () => {};
+    let unsubscribeFromPost = () => {};
 
     export default {
         name: "Posts",
+        components: { Post },
         data() {
             return {
-                newPost: "",
                 posts: [],
-                currentUser: null,
+                newPost: {
+                    content: null,
+                },
+
+                user: {
+                    id: null,
+                    display_name: null,
+                    bio: null,
+                    email: null,
+                }
             };
         },
         methods: {
-            async addPost() {
+            async handleSubmit(){
                 try {
-                    if (!this.currentUser?.id) {
-                        throw new Error("Debes iniciar sesión para publicar.");
-                    }
-
-                    const newPub = await createPost(this.newPost, this.currentUser.id);
-                    this.posts.unshift(newPub); // Añadir al principio
-                    this.newPost = "";
+                    postGlobalnNewPost({sender_id: this.user.id, content: this.newPost.content});
                 } catch (error) {
-                    console.error(error.message);
+                    console.error(error);
                 }
-            },
-            async fetchPosts() {
-                try {
-                    this.posts = await fetchAllPosts();
-                } catch (error) {
-                    console.error(error.message);
-                }
+                this.newPost.content = null;
             },
         },
-        mounted() {
-            this.fetchPosts();
-            subscribeToAuthStateChanges((user) => {
-                this.currentUser = user;
+        async mounted() {
+            this.posts = await fetchGlobalPost();
+            unsubscribeFromPost = subscribeToGlobalPostNewPosts(newPost => this.posts.unshift(newPost));
+
+            unsubscribeFromAuth = subscribeToAuthStateChanges( (userState) => {
+                this.user = userState;
             });
         },
+        unmounted(){
+            unsubscribeFromAuth();
+            unsubscribeFromPost();
+        }
     };
 </script>

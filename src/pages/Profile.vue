@@ -8,7 +8,7 @@
                         <div class="flex flex-col items-center">
                             <h2 class="text-xl font-bold">{{ user.display_name }}</h2>
                             <p class="text-gray-700">{{ user.email }}</p>
-                            <div class="mt-6 flex flex-wrap gap-4 justify-center">
+                            <div class="mt-6 flex flex-wrap gap-4 justify-center" v-if="user.id === user_id">
                                 <RouterLink to="/perfil/editar" class="bg-primary hover:bg-blue-600 text-white py-2 px-4 rounded">
                                     Editar
                                 </RouterLink>
@@ -23,6 +23,19 @@
                 <div class="col-span-4 sm:col-span-9">
                     <div class="bg-white shadow rounded-lg p-6">
                         <h3 class="text-xl font-bold mb-4">Publicaciones</h3>
+                        <hr class="mt-12 mb-6">
+                        <div class="post-list">
+                            <template v-if="posts.length === 0">
+                                <p>sin Publicaciones :(</p>
+                            </template>
+                            <template v-else>
+                                <Post
+                                v-for="post in posts"
+                                :key="post.id"
+                                :post="post"
+                                />
+                            </template>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -31,24 +44,32 @@
 </template>
 
 <script>
+    import Post from '../components/Post.vue';
     import { subscribeToAuthStateChanges } from '../services/auth';
+import { fetchUserPost } from '../services/posts';
 
     let unsubscribe = () => {};
     export default {
         name: "Profile",
+        components: { Post },
         data(){
             return {
+                user_id: this.$route.params.id || null,
                 user: {
                     id: null,
                     display_name: null,
                     email: null,
                     bio: null,
-                }
+                },
+                posts: []
             };
         },
-        mounted(){
-            unsubscribe = subscribeToAuthStateChanges( (userState) => {
+        async mounted(){
+            unsubscribe = subscribeToAuthStateChanges( async (userState) => {
                 this.user = userState;
+                this.posts = await fetchUserPost(this.user.id)
+                // console.log(this.posts);
+                
             });
         },
         unmounted(){
