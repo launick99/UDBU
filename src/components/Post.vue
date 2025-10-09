@@ -1,7 +1,7 @@
 <template>
     <div class="post p-4 border-b border-gray-200">
         <RouterLink :to="`/usuario/${post.sender_id}`" class="text-sm font-semibold text-gray-900">
-            {{ post.sender_id }}
+            {{ post.user_profile?.display_name || post.user_profile?.email || post.sender_id }}
         </RouterLink>
         <p class="text-xs text-gray-500">{{ timeAgo(post.created_at) }}</p>
         <div class="mt-3">

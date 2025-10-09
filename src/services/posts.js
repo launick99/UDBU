@@ -29,7 +29,14 @@ export async function postGlobalnNewPost({sender_id, content}) {
 export async function fetchGlobalPost() {
     const { data, error } = await supabase
         .from('posts')
-        .select('*')
+        .select(`
+            *,
+            user_profile:sender_id (
+                id,
+                display_name,
+                email
+            )
+        `)
         .order('created_at', { ascending: false });
     
     if (error) {
@@ -50,7 +57,14 @@ export async function fetchGlobalPost() {
 export async function fetchUserPost(id) {
     const { data, error } = await supabase
         .from('posts')
-        .select('*')
+        .select(`
+            *,
+            user_profile:sender_id (
+                id,
+                display_name,
+                email
+            )
+        `)
         .eq('sender_id', id)
         .order('created_at', { ascending: false });
     

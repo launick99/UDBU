@@ -6,7 +6,9 @@
                 <div class="bg-white shadow rounded-lg p-6">
                     <div class="flex flex-col items-center">
                         <h2 class="text-xl font-bold">{{ profile_user.display_name || 'Usuario' }}</h2>
-                        <p class="text-gray-700">{{ profile_user.email }}</p>
+                        <p class="text-blue-900 hover:text-blue-950">
+                            <a :href="`mailto:${profile_user.email}`">{{ profile_user.email }}</a>
+                        </p>
                     </div>
 
                     <hr class="my-6 border-t border-gray-300">

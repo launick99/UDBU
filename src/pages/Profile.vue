@@ -7,8 +7,10 @@
                     <div class="bg-white shadow rounded-lg p-6">
                         <div class="flex flex-col items-center">
                             <h2 class="text-xl font-bold">{{ user.display_name }}</h2>
-                            <p class="text-gray-700">{{ user.email }}</p>
-                            <div class="mt-6 flex flex-wrap gap-4 justify-center" v-if="user.id === user_id">
+                            <p class="text-blue-900 hover:text-blue-950">
+                                <a :href="`mailto:${user.email}`">{{ user.email }}</a>
+                            </p>
+                            <div class="mt-6 flex flex-wrap gap-4 justify-center">
                                 <RouterLink to="/perfil/editar" class="bg-primary hover:bg-blue-600 text-white py-2 px-4 rounded">
                                     Editar
                                 </RouterLink>
@@ -46,7 +48,7 @@
 <script>
     import Post from '../components/Post.vue';
     import { subscribeToAuthStateChanges } from '../services/auth';
-import { fetchUserPost } from '../services/posts';
+    import { fetchUserPost } from '../services/posts';
 
     let unsubscribe = () => {};
     export default {
@@ -69,11 +71,17 @@ import { fetchUserPost } from '../services/posts';
                 this.user = userState;
                 this.posts = await fetchUserPost(this.user.id)
                 // console.log(this.posts);
-                
             });
         },
         unmounted(){
             unsubscribe();
+            this.posts = [];
+            this.user = {
+                id: null,
+                display_name: null,
+                email: null,
+                bio: null,
+            };
         }
     };
 </script>
