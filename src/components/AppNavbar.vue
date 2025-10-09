@@ -48,6 +48,9 @@
                         <router-link to="/post" @click="mobileMenuOpen = false">Home</router-link>
                     </li>
                     <li>
+                        <router-link to="/perfil">Mi Perfil</router-link>
+                    </li>
+                    <li>
                         <a @click="handleLogout" class="cursor-pointer">Cerrar sesión</a>
                     </li>
                 </template>

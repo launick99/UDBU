@@ -10,17 +10,17 @@ body{
 
 #app{
     /* ocupa todo el alto de la pagina */
-    @apply h-[100vh] overflow-y-auto sm:overflow-hidden;
+    @apply h-[100vh] flex flex-col overflow-hidden;
 }
 
 #app .main-container {
     /* ocupa todo el espacio disponible del flex de arriba, cosa para que el footer quede al fondo */
     /* meto el scroll aca, para que siempre se vea el header y el footer desde sm */
-    @apply h-[100vh] flex flex-col overflow-hidden sm:overflow-y-auto;
+    @apply h-[100vh] flex flex-col overflow-y-auto;
+}
 
-    main{
-        @apply h-full;
-    }
+#app .main-container main{
+    @apply flex-grow;
 }
 
 nav {
