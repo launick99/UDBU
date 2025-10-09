@@ -1,5 +1,11 @@
 import supabase from './supabase';
 
+/**
+ * Inserta una nueva publicación en la tabla `posts`.
+ *
+ * @param {{sender_id: String, content: String}} data 
+ * @throws {Error}
+ */
 export async function postGlobalnNewPost({sender_id, content}) {
     const { data, error } = await supabase
         .from('posts')
@@ -14,6 +20,12 @@ export async function postGlobalnNewPost({sender_id, content}) {
     }
 }
 
+/**
+ * Trae todas las publicaciones globales, ordenadas por fecha (como twitter).
+ *
+ * @returns {Promise<Array>}
+ * @throws {Error}
+ */
 export async function fetchGlobalPost() {
     const { data, error } = await supabase
         .from('posts')
@@ -28,6 +40,13 @@ export async function fetchGlobalPost() {
     return data;
 }
 
+/**
+ * Trae todas las publicaciones de un usuario.
+ *
+ * @param {string} id
+ * @returns {Promise<Array<Object>>} - Lista de publicaciones del usuario.
+ * @throws {Error}
+ */
 export async function fetchUserPost(id) {
     const { data, error } = await supabase
         .from('posts')
@@ -43,6 +62,12 @@ export async function fetchUserPost(id) {
     return data;
 }
 
+/**
+ * Suscribe al canal de publicaciones nuevas
+ *
+ * @param {(newPost: Object) => void} callback
+ * @returns {() => void} - Retorna una función que al ejecutarla cancela la suscripción.
+ */
 export function subscribeToGlobalPostNewPosts(callback){
     let postsChannel = supabase.channel('posts');
 
