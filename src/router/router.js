@@ -6,7 +6,7 @@ import Posts from "../pages/Posts.vue";
 import Login from "../pages/Login.vue";
 import Register from "../pages/Register.vue";
 import Profile from "../pages/Profile.vue";
-import Usuario from "../pages/Usuario.vue";
+import User from "../pages/User.vue";
 import ProfileEdit from "../pages/ProfileEdit.vue";
 
 // Importaciones de páginas de error
@@ -27,7 +27,7 @@ const routes = [
     { component: Register,          path: '/register',              meta: { guest: true }           },
     { component: Posts,             path: '/post',                  meta: { requiresAuth: true }    },
     { component: Profile,           path: '/perfil/',               meta: { requiresAuth: true }    },
-    { component: Usuario,           path: '/usuario/:id?',          meta: { requiresAuth: true }    },
+    { component: User,           path: '/usuario/:id?',          meta: { requiresAuth: true }    },
     { component: ProfileEdit,       path: '/perfil/editar',         meta: { requiresAuth: true }    },
     { component: Er403,             path: '/403'                                                    },
     { component: Er404,             path: '/404'                                                    },

@@ -42,7 +42,7 @@
 </template>
 
 <script>
-    import Post from '../components/Post.vue'
+    import Post from '../components/Posts/Post.vue'
     import { getUserProfileById } from '../services/user-profile'
     import { fetchUserPost } from '../services/posts'
 

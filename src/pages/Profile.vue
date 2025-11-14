@@ -46,7 +46,7 @@
 </template>
 
 <script>
-    import Post from '../components/Post.vue';
+    import Post from '../components/Posts/Post.vue';
     import { subscribeToAuthStateChanges } from '../services/auth';
     import { fetchUserPost } from '../services/posts';
 
