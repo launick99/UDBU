@@ -39,55 +39,49 @@
 </template>
 
 
-<script>
-import { fetchGlobalPost, postGlobalnNewPost, subscribeToGlobalPostNewPosts } from '../services/posts';
-import { subscribeToAuthStateChanges } from '../services/auth';
-import SideNavbarLeft from '../components/Navegation/SideNavbarLeft.vue';
-import SideNavbarRight from '../components/Navegation/SideNavbarRight.vue';
-import Post from '../components/Posts/Post.vue';
+<script setup>
+    import { ref, onMounted, onUnmounted } from 'vue';
+    import { fetchGlobalPost, postGlobalnNewPost, subscribeToGlobalPostNewPosts } from '../services/posts';
+    import { subscribeToAuthStateChanges } from '../services/auth';
+    import SideNavbarLeft from '../components/Navegation/SideNavbarLeft.vue';
+    import SideNavbarRight from '../components/Navegation/SideNavbarRight.vue';
+    import Post from '../components/Posts/Post.vue';
 
-let unsubscribeFromAuth = () => { };
-let unsubscribeFromPost = () => { };
+    const posts = ref([]);
+    const newPost = ref({
+        content: null,
+    });
 
-export default {
-    name: "Posts",
-    components: { SideNavbarLeft, Post, SideNavbarRight },
-    data() {
-        return {
-            posts: [],
-            newPost: {
-                content: null,
-            },
+    const user = ref({
+        id: null,
+        display_name: null,
+        bio: null,
+        email: null,
+    });
 
-            user: {
-                id: null,
-                display_name: null,
-                bio: null,
-                email: null,
-            }
-        };
-    },
-    methods: {
-        async handleSubmit() {
-            try {
-                postGlobalnNewPost({ sender_id: this.user.id, content: this.newPost.content });
-            } catch (error) {
-                console.error(error);
-            }
-            this.newPost.content = null;
-        },
-    },
-    async mounted() {
-        this.posts = await fetchGlobalPost();
-        unsubscribeFromPost = subscribeToGlobalPostNewPosts(newPost => this.posts.unshift(newPost));
+    let unsubscribeFromAuth = () => { };
+    let unsubscribeFromPost = () => { };
+
+    const handleSubmit = async () => {
+        try {
+            await postGlobalnNewPost({ sender_id: user.value.id, content: newPost.value.content });
+        } catch (error) {
+            console.error(error);
+        }
+        newPost.value.content = null;
+    };
+
+    onMounted(async () => {
+        posts.value = await fetchGlobalPost();
+        unsubscribeFromPost = subscribeToGlobalPostNewPosts(newPostData => posts.value.unshift(newPostData));
 
         unsubscribeFromAuth = subscribeToAuthStateChanges((userState) => {
-            this.user = userState;
+            user.value = userState;
         });
-    },
-    unmounted() {
+    });
+
+    onUnmounted(() => {
         unsubscribeFromAuth();
         unsubscribeFromPost();
-    }
-};
+    });
 </script>

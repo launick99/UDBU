@@ -43,56 +43,52 @@
         </div>
     </div>
 </template>
-
-<script>
+<script setup>
+    import { ref, onMounted, onUnmounted } from 'vue';
     import { subscribeToAuthStateChanges, updateAuthUser } from '../services/auth';
 
+    const user = ref({
+        id: null,
+        email: null,
+    });
+
+    const form = ref({
+        id: null,
+        display_name: "",
+        email: "",
+        bio: ""
+    });
+
+    const loading = ref(false);
+    const successMessage = ref("");
+    const errorMessage = ref("");
+
     let unsubscribe = () => {};
-    export default {
-        name: "ProfileEdit",
-        data() {
-            return {
-                user: {
-                    id: null,
-                    email: null,
-                },
-                form: {
-                    id: null,
-                    display_name: "",
-                    email: "",
-                    bio: ""
-                },
-                loading: false,
-                successMessage: "",
-                errorMessage: ""
-            };
-        },
-        methods: {
-            async handleSubmit() {
-                this.errorMessage = "";
-                this.successMessage = "";
-                try {
-                    this.loading = true;
-                    await updateAuthUser({
-                        display_name: this.form.display_name, 
-                        bio: this.form.bio
-                    });
-                    this.successMessage = "Perfil actualizado con éxito.";
-                } catch (error) {
-                    this.errorMessage = error.message || "Error al actualizar el perfil.";
-                }
-                this.loading = false;
-            },
-        },
-        updated(){
-            //
-        },
-        mounted() {
-            unsubscribe =subscribeToAuthStateChanges(UserState => this.user = UserState);
-            this.form = { ...this.user };
-        },
-        unmounted(){
-            unsubscribe();
+
+    const handleSubmit = async () => {
+        errorMessage.value = "";
+        successMessage.value = "";
+        try {
+            loading.value = true;
+            await updateAuthUser({
+                display_name: form.value.display_name, 
+                bio: form.value.bio
+            });
+            successMessage.value = "Perfil actualizado con éxito.";
+        } catch (error) {
+            errorMessage.value = error.message || "Error al actualizar el perfil.";
         }
+        loading.value = false;
     };
+
+    onMounted(() => {
+        unsubscribe = subscribeToAuthStateChanges((userState) => {
+            user.value = userState;
+            form.value = { ...user.value };
+        });
+    });
+
+    onUnmounted(() => {
+        unsubscribe();
+    });
 </script>
