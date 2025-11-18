@@ -6,7 +6,7 @@
                     <i class="fa-solid fa-cake-candles text-blue-600"></i>
                 </div>
                 <div>
-                    <h3 class="text-sm font-semibold">Cumpleaños!</h3>
+                    <h3 class="text-sm font-semibold">¡Cumpleaños!</h3>
                     <p> Lorem ipsum, dolor sit amet consectetur adipisicing elit. Necessitatibus explicabo alias, vero ratione ipsa magni libero consequatur vel esse cupiditate. Quibusdam sed maxime porro, aliquid rerum magnam atque facilis repellendus? </p>
                 </div>
             </div>

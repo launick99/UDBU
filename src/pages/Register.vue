@@ -28,8 +28,8 @@
                     {{ loading ? 'Registrando...' : 'Registrarme' }}
                 </button>
                 <p class="text-right mt-2">
-                    ya tienes cuenta?
-                    <router-link class="text-primary hover:text-blue-700" to="/login">iniciar sesion!</router-link>
+                    ¿ya tienes cuenta?
+                    <router-link class="text-primary hover:text-blue-700" to="/login">¡iniciar sesion!</router-link>
                 </p>
             </div>
 

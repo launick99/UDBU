@@ -28,8 +28,8 @@
                     {{ loading ? 'Ingresando...' : 'Ingresar' }}
                 </button>
                 <p class="text-right mt-2">
-                    no tienes cuenta?
-                    <router-link class="text-primary hover:text-blue-700" to="/register">Registrarme!</router-link>
+                    ¿no tienes cuenta?
+                    <router-link class="text-primary hover:text-blue-700" to="/register">¡Registrarme!</router-link>
                 </p>
             </div>
 

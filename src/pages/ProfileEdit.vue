@@ -22,12 +22,12 @@
                         <h3 class="text-lg font-semibold mb-4">Editar perfil</h3>
                         <form @submit.prevent="handleSubmit">
                             <div class="mb-4">
-                                <label class="block text-gray-700 mb-1">Nombre para mostrar</label>
-                                <input v-model="form.display_name" type="text" class="w-full border border-gray-300 rounded px-3 py-2" />
+                                <label class="block text-gray-700 mb-1" for="username">Nombre para mostrar</label>
+                                <input v-model="form.display_name" id="usarname" name="username" type="text" class="w-full border border-gray-300 rounded px-3 py-2" />
                             </div>
                             <div class="mb-4">
-                                <label class="block text-gray-700 mb-1">Biografía</label>
-                                <textarea v-model="form.bio" class="w-full border border-gray-300 rounded px-3 py-2"></textarea>
+                                <label class="block text-gray-700 mb-1" for="bio">Biografía</label>
+                                <textarea v-model="form.bio" id="bio" name="bio" class="w-full border border-gray-300 rounded px-3 py-2"></textarea>
                             </div>
                             <div class="flex justify-end">
                                 <button :disabled="loading" type="submit" class="bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded">
