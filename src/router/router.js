@@ -8,6 +8,7 @@ import Register from "../pages/Register.vue";
 import Profile from "../pages/Profile.vue";
 import User from "../pages/User.vue";
 import ProfileEdit from "../pages/ProfileEdit.vue";
+import ProfileEditAvatar from "../pages/ProfileEditAvatar.vue";
 
 // Importaciones de páginas de error
 import Er403 from "../pages/Errors/Er403.vue";
@@ -27,8 +28,9 @@ const routes = [
     { component: Register,          path: '/register',              meta: { guest: true }           },
     { component: Posts,             path: '/post',                  meta: { requiresAuth: true }    },
     { component: Profile,           path: '/perfil/',               meta: { requiresAuth: true }    },
-    { component: User,           path: '/usuario/:id?',          meta: { requiresAuth: true }    },
+    { component: User,              path: '/usuario/:id?',          meta: { requiresAuth: true }    },
     { component: ProfileEdit,       path: '/perfil/editar',         meta: { requiresAuth: true }    },
+    { component: ProfileEditAvatar, path: '/perfil/editar-avatar',  meta: { requiresAuth: true }    },
     { component: Er403,             path: '/403'                                                    },
     { component: Er404,             path: '/404'                                                    },
     // Ruta catch-all para 404

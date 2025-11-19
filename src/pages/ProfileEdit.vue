@@ -44,44 +44,10 @@
     </div>
 </template>
 <script setup>
-    import { ref, watch } from 'vue';
-    import { updateAuthUser } from '../services/auth';
     import { useAuthUserState } from '../composables/useAuthUserState';
+    import { useUserProfileEdit } from '../composables/useUserProfileEdit';
 
     const { user } = useAuthUserState();
-
-    const form = ref({
-        id: null,
-        display_name: "",
-        email: "",
-        bio: ""
-    });
-
-    const loading = ref(false);
-    const successMessage = ref("");
-    const errorMessage = ref("");
-
-    const handleSubmit = async () => {
-        errorMessage.value = "";
-        successMessage.value = "";
-        try {
-            loading.value = true;
-            await updateAuthUser({
-                display_name: form.value.display_name, 
-                bio: form.value.bio
-            });
-            successMessage.value = "Perfil actualizado con éxito.";
-        } catch (error) {
-            errorMessage.value = error.message || "Error al actualizar el perfil.";
-        }
-        loading.value = false;
-    };
-
-    watch(user, () => {
-        if (user.value) {
-            form.value = { ...user.value };
-        }
-    }, { immediate: true });
-
+    const { form, loading, successMessage, errorMessage, handleSubmit } = useUserProfileEdit(user);
 
 </script>

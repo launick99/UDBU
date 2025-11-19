@@ -8,7 +8,7 @@ export function useAuthUserState() {
         email: null,
         display_name: null,
         bio: null,
-        // avatar_url: null,
+        avatar_url: null,
     });
 
     onMounted(() => unsuscribeFromAuth = subscribeToAuthStateChanges( userstate => user.value = userstate ));

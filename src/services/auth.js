@@ -1,3 +1,4 @@
+import { uploadFile } from './storage';
 import supabase from './supabase';
 import { createUserProfile, getUserProfileById, updateUserProfile } from './user-profile';
 
@@ -9,7 +10,8 @@ let user = {
     id: null,
     email: null,
     display_name: null,
-    bio: null
+    bio: null,
+    avatar_url: null,
 }
 
 /**
@@ -111,9 +113,10 @@ export async function logout() {
 
 /**
  * 
+ * Actualiza la información del usuario autenticado.
+ * 
  * @param {{display_name?: String|null, bio?: String|null}} data 
  */
-
 export async function updateAuthUser(data){
     try {
         await updateUserProfile(user.id, data);
@@ -121,6 +124,22 @@ export async function updateAuthUser(data){
             display_name: data.display_name ?? user.display_name,
             bio: data.bio ?? user.bio
         });
+    } catch (error) {
+        throw new Error(error.message);
+    }
+}
+
+/**
+ * 
+ * @param {File} file 
+ */
+export async function updateAuthUserAvatar(file){
+    try {
+        const filename = `${user.id}/avatar.jpg`;
+        await uploadFile(filename, file);
+        setUser({
+            avatar_url: filename
+        })
     } catch (error) {
         throw new Error(error.message);
     }

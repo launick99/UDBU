@@ -14,6 +14,9 @@
                                 <RouterLink to="/perfil/editar" class="bg-primary hover:bg-blue-600 text-white py-2 px-4 rounded">
                                     Editar
                                 </RouterLink>
+                                <RouterLink to="/perfil/editar-avatar" class="bg-primary hover:bg-blue-600 text-white py-2 px-4 rounded">
+                                    Cambiar Foto
+                                </RouterLink>
                             </div>
                         </div>
                         <hr class="my-6 border-t border-gray-300">
