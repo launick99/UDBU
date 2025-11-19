@@ -40,7 +40,7 @@
 </template>
 
 <script>
-import {login} from '../services/auth';
+import { login } from '../services/auth';
 
 export default {
     name: 'Login',
@@ -53,7 +53,6 @@ export default {
         }
     },
     methods: {
-        /** TODO: comentar, es void */
         async login() {
             this.errorMessage = '';
             this.loading = true;

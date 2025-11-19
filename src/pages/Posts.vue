@@ -42,24 +42,18 @@
 <script setup>
     import { ref, onMounted, onUnmounted } from 'vue';
     import { fetchGlobalPost, postGlobalnNewPost, subscribeToGlobalPostNewPosts } from '../services/posts';
-    import { subscribeToAuthStateChanges } from '../services/auth';
     import SideNavbarLeft from '../components/Navegation/SideNavbarLeft.vue';
     import SideNavbarRight from '../components/Navegation/SideNavbarRight.vue';
     import Post from '../components/Posts/Post.vue';
+    import { useAuthUserState } from '../composables/useAuthUserState';
+
+    const {user} = useAuthUserState();
 
     const posts = ref([]);
     const newPost = ref({
         content: null,
     });
 
-    const user = ref({
-        id: null,
-        display_name: null,
-        bio: null,
-        email: null,
-    });
-
-    let unsubscribeFromAuth = () => { };
     let unsubscribeFromPost = () => { };
 
     const handleSubmit = async () => {
@@ -74,14 +68,9 @@
     onMounted(async () => {
         posts.value = await fetchGlobalPost();
         unsubscribeFromPost = subscribeToGlobalPostNewPosts(newPostData => posts.value.unshift(newPostData));
-
-        unsubscribeFromAuth = subscribeToAuthStateChanges((userState) => {
-            user.value = userState;
-        });
     });
 
     onUnmounted(() => {
-        unsubscribeFromAuth();
         unsubscribeFromPost();
     });
 </script>

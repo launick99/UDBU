@@ -44,13 +44,11 @@
     </div>
 </template>
 <script setup>
-    import { ref, onMounted, onUnmounted } from 'vue';
-    import { subscribeToAuthStateChanges, updateAuthUser } from '../services/auth';
+    import { ref, watch } from 'vue';
+    import { updateAuthUser } from '../services/auth';
+    import { useAuthUserState } from '../composables/useAuthUserState';
 
-    const user = ref({
-        id: null,
-        email: null,
-    });
+    const { user } = useAuthUserState();
 
     const form = ref({
         id: null,
@@ -62,8 +60,6 @@
     const loading = ref(false);
     const successMessage = ref("");
     const errorMessage = ref("");
-
-    let unsubscribe = () => {};
 
     const handleSubmit = async () => {
         errorMessage.value = "";
@@ -81,14 +77,11 @@
         loading.value = false;
     };
 
-    onMounted(() => {
-        unsubscribe = subscribeToAuthStateChanges((userState) => {
-            user.value = userState;
+    watch(user, () => {
+        if (user.value) {
             form.value = { ...user.value };
-        });
-    });
+        }
+    }, { immediate: true });
 
-    onUnmounted(() => {
-        unsubscribe();
-    });
+
 </script>

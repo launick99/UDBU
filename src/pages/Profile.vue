@@ -23,7 +23,7 @@
                     </div>
                 </div>
                 <div class="col-span-4 sm:col-span-9">
-                    <div class="bg-white shadow rounded-lg p-6">
+                    <div class="p-6">
                         <h3 class="text-xl font-bold mb-4">Publicaciones</h3>
                         <hr class="mt-12 mb-6">
                         <div class="post-list">
@@ -32,9 +32,9 @@
                             </template>
                             <template v-else>
                                 <Post
-                                v-for="post in posts"
-                                :key="post.id"
-                                :post="post"
+                                    v-for="post in posts"
+                                    :key="post.id"
+                                    :post="post"
                                 />
                             </template>
                         </div>
@@ -45,43 +45,26 @@
     </div>
 </template>
 
-<script>
-    import Post from '../components/Posts/Post.vue';
-    import { subscribeToAuthStateChanges } from '../services/auth';
-    import { fetchUserPost } from '../services/posts';
+<script setup>
+    import Post from '../components/Posts/Post.vue'
+    import { fetchUserPost } from '../services/posts'
+    import { ref, watch } from 'vue';
+    import { useAuthUserState } from '../composables/useAuthUserState';
 
-    let unsubscribe = () => {};
-    export default {
-        name: "Profile",
-        components: { Post },
-        data(){
-            return {
-                user_id: this.$route.params.id || null,
-                user: {
-                    id: null,
-                    display_name: null,
-                    email: null,
-                    bio: null,
-                },
-                posts: []
-            };
+    const posts = ref([]);
+
+    const { user } = useAuthUserState();
+    
+    watch(() => user.value?.id,
+        async (id) => {
+            if (!id) return
+            try {
+                posts.value = await fetchUserPost(id)
+            } catch {
+                posts.value = []
+            }
         },
-        async mounted(){
-            unsubscribe = subscribeToAuthStateChanges( async (userState) => {
-                this.user = userState;
-                this.posts = await fetchUserPost(this.user.id)
-                // console.log(this.posts);
-            });
-        },
-        unmounted(){
-            unsubscribe();
-            this.posts = [];
-            this.user = {
-                id: null,
-                display_name: null,
-                email: null,
-                bio: null,
-            };
-        }
-    };
+        { immediate: true }
+    )
+
 </script>

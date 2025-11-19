@@ -1,29 +1,35 @@
 <template>
     <div class="usuario-perfil container mx-auto py-8">
-        <!-- tome prestado el template y le hice algunas modificaciones -->
         <div class="grid grid-cols-4 sm:grid-cols-12 gap-6 px-4">
             <div class="col-span-4 sm:col-span-3">
                 <div class="bg-white shadow rounded-lg p-6">
-                    <div class="flex flex-col items-center">
-                        <h2 class="text-xl font-bold">{{ profile_user.display_name || 'Usuario' }}</h2>
-                        <p class="text-blue-900 hover:text-blue-950">
-                            <a :href="`mailto:${profile_user.email}`">{{ profile_user.email }}</a>
-                        </p>
+                    <div v-if="loading" class="flex w-full justify-center">
+                        <div class="loader"></div>
                     </div>
-
-                    <hr class="my-6 border-t border-gray-300">
-
-                    <div class="flex flex-col">
-                        {{ profile_user.bio || "Este usuario no ha escrito una biografía." }}
-                    </div>
+                    <template v-else>
+                        <div class="flex flex-col items-center">
+                            <h2 class="text-xl font-bold">{{ user.display_name || 'Usuario' }}</h2>
+                            <p class="text-blue-900 hover:text-blue-950">
+                                <a :href="`mailto:${user.email}`">{{ user.email }}</a>
+                            </p>
+                        </div>
+    
+                        <hr class="my-6 border-t border-gray-300">
+    
+                        <div class="flex flex-col">
+                            {{ user.bio || "Este usuario no ha escrito una biografía." }}
+                        </div>
+                    </template>
                 </div>
             </div>
             <div class="col-span-4 sm:col-span-9">
-                <div class="bg-white shadow rounded-lg p-6">
+                <div class="p-6">
                     <h3 class="text-xl font-bold mb-4">Publicaciones de Usuario</h3>
                     <hr class="mt-2 mb-6">
-
-                    <div class="post-list">
+                    <div v-if="loading" class="flex w-full justify-center">
+                        <div class="loader"></div>
+                    </div>
+                    <div v-else class="post-list">
                         <template v-if="posts.length === 0">
                             <p>No hay publicaciones de este usuario.</p>
                         </template>
@@ -41,57 +47,29 @@
     </div>
 </template>
 
-<script>
+<script setup>
+    import { useRoute } from 'vue-router'
     import Post from '../components/Posts/Post.vue'
-    import { getUserProfileById } from '../services/user-profile'
     import { fetchUserPost } from '../services/posts'
+    import useUserProfile from '../composables/useUserProfile'
+    import { ref, watch } from 'vue';
 
-    export default {
-        name: "Usuario",
-        components: { Post },
-        data() {
-            return {
-                user_id: null,
-                profile_user: {
-                    id: null,
-                    display_name: null,
-                    email: null,
-                    bio: null
-                },
-                posts: []
+    const posts = ref([]);
+    const route = useRoute();
+    const {user, loading} = useUserProfile(route.params.id);
+
+    watch(() => route.params.id,
+        async (id) => {
+            if(!id){
+                return
+            }
+            try {
+                posts.value = await fetchUserPost(id);
+            } catch {
+                posts.value = [];
             }
         },
-        watch: {
-            '$route.params.id': {
-                immediate: true,
-                handler(newId) {
-                    this.user_id = newId
-                    this.loadUserData()
-                }
-            }
-        },
-        methods: {
-            async loadUserData() {
-                if (!this.user_id) {
-                    this.profile_user = { id: null, display_name: null, email: null, bio: null }
-                    this.posts = []
-                    return
-                }
+        { immediate: true }
+    )
 
-                try {
-                    this.profile_user = await getUserProfileById(this.user_id)
-                } catch (error) {
-                    // console.error('Error al cargar perfil del usuario:', error)
-                    this.profile_user = { id: null, display_name: null, email: null, bio: null }
-                }
-
-                try {
-                    this.posts = await fetchUserPost(this.user_id)
-                } catch (error) {
-                    // console.error('Error al cargar publicaciones del usuario:', error)
-                    this.posts = []
-                }
-            }
-        }
-    }
 </script>
