@@ -26,7 +26,7 @@
                 <div class="max-w-7xl flex flex-row justify-content-between container mx-auto">
                     <!-- lista de posts -->
                     <div class="w-full post-list space-y-4 mb-4">
-                        <div v-if="posts.length === 0">
+                        <div v-if="posts.length === 0" class="flex justify-center w-full">
                             <div class="loader"></div>
                         </div>
                         <Post v-for="post in posts" :key="post.id" :post="post" />

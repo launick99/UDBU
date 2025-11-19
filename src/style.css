@@ -85,7 +85,7 @@ footer{
     display: grid;
     border: 4px solid #0000;
     border-radius: 50%;
-    border-color: #ccc #0000;
+    border-color: #1277baff #acffffff;
     animation: l16 1s infinite linear;
 }
 .loader::before,
@@ -97,7 +97,7 @@ footer{
     border-radius: 50%;
 }
 .loader::before {
-    border-color: #1277ba #003558;
+    border-color: #acffffff #1277baff;
     animation: inherit; 
     animation-duration: .5s;
     animation-direction: reverse;
