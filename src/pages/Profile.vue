@@ -63,9 +63,8 @@
     import { getFileURL } from '../services/storage';
 
     const posts = ref([]);
-
     const { user } = useAuthUserState();
-    
+
     watch(() => user.value?.id,
         async (id) => {
             if (!id) return

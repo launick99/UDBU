@@ -5,7 +5,7 @@
             <div class="flex items-start justify-between">
                 <div class="text-sm font-semibold text-gray-900">
                     <RouterLink :to="`/usuario/${post.sender_id}`" class="flex items-center">
-                        <img :src="getFileURL(post.user_profile.avatar_url)" :alt="post.user_profile?.display_name" class="h-10 w-10 rounded-full object-cover border border-gray-200">
+                        <img :src="getFileURL(post.user_profile?.avatar_url)" :alt="post.user_profile?.display_name" class="h-10 w-10 rounded-full object-cover border border-gray-200">
                         <div class="ml-3">
                             {{ post.user_profile?.display_name || post.user_profile?.email || post.sender_id }}
                             <div class="text-xs text-gray-500">{{ timeAgo(post.created_at) }}</div>
@@ -24,7 +24,7 @@
             </div>
             <!-- Galeria -->
             <div class="mt-3 -mx-4" v-if="hasMedia">
-                <img src="" alt="Post" class="w-full h-auto max-h-[500px] object-cover">
+                <img :src="getFileURL(post.post_media[0].media, 'posts')" alt="Post" class="w-full h-auto max-h-[500px] object-cover">
             </div>
             <!-- Cantida de likes, comentarios -->
             <div class="mt-3 pt-2 border-t border-gray-100 flex justify-between text-xs text-gray-500">
@@ -49,16 +49,19 @@
 </template>
 
 <script setup>
-    import { ref } from 'vue';
+    import { computed } from 'vue';
     import { getFileURL } from '../../services/storage';
 
-    defineProps({
+    const props = defineProps({
         post: {
             type: Object,
             required: true
         }
     });
-    const hasMedia = ref(false);
+
+    const hasMedia = computed(() => 
+        Array.isArray(props.post.post_media) && props.post.post_media.length > 0
+    );
 
     function timeAgo(date) {
         const ahora = new Date();
