@@ -34,7 +34,8 @@ export async function fetchGlobalPost() {
             user_profile:sender_id (
                 id,
                 display_name,
-                email
+                email,
+                avatar_url
             )
         `)
         .order('created_at', { ascending: false });
@@ -62,7 +63,8 @@ export async function fetchUserPost(id) {
             user_profile:sender_id (
                 id,
                 display_name,
-                email
+                email,
+                avatar_url
             )
         `)
         .eq('sender_id', id)

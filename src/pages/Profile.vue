@@ -6,6 +6,13 @@
                 <div class="col-span-4 sm:col-span-3">
                     <div class="bg-white shadow rounded-lg p-6">
                         <div class="flex flex-col items-center">
+                            <div class="mb-4">
+                                <img 
+                                    :src="getFileURL(user.avatar_url)" 
+                                    alt="Vista previa de la imagen"
+                                    class="w-32 h-32 object-cover rounded-full border border-gray-300"
+                                >
+                            </div>
                             <h2 class="text-xl font-bold">{{ user.display_name }}</h2>
                             <p class="text-blue-900 hover:text-blue-950">
                                 <a :href="`mailto:${user.email}`">{{ user.email }}</a>
@@ -53,6 +60,7 @@
     import { fetchUserPost } from '../services/posts'
     import { ref, watch } from 'vue';
     import { useAuthUserState } from '../composables/useAuthUserState';
+    import { getFileURL } from '../services/storage';
 
     const posts = ref([]);
 

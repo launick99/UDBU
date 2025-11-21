@@ -6,7 +6,7 @@
                 <form @submit.prevent="handleSubmit" class="bg-white rounded-xl shadow-sm border border-gray-200 p-4 mb-4">
                     <!-- form para crear nuevo post -->
                     <div class="flex items-center mb-3">
-                        <img src="" :alt="user.display_name" class="h-10 w-10 rounded-full object-cover border border-gray-200 mr-3">
+                        <img :src="getFileURL(user.avatar_url)" :alt="user.display_name" class="h-10 w-10 rounded-full object-cover border border-gray-200 mr-3">
                         <textarea class="form-textarea" placeholder="¿Qué estás pensando?" type="text" v-model="newPost.content"></textarea>
                     </div>
                     <div class="mt-3 pt-3 border-t border-gray-200 flex flex-wrap items-center justify-between">
@@ -46,6 +46,7 @@
     import SideNavbarRight from '../components/Navegation/SideNavbarRight.vue';
     import Post from '../components/Posts/Post.vue';
     import { useAuthUserState } from '../composables/useAuthUserState';
+    import { getFileURL } from '../services/storage';
 
     const {user} = useAuthUserState();
 

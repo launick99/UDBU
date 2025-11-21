@@ -8,6 +8,13 @@
                     </div>
                     <template v-else>
                         <div class="flex flex-col items-center">
+                            <div class="mb-4">
+                                <img 
+                                    :src="getFileURL(user.avatar_url)" 
+                                    alt="Vista previa de la imagen"
+                                    class="w-32 h-32 object-cover rounded-full border border-gray-300"
+                                >
+                            </div>
                             <h2 class="text-xl font-bold">{{ user.display_name || 'Usuario' }}</h2>
                             <p class="text-blue-900 hover:text-blue-950">
                                 <a :href="`mailto:${user.email}`">{{ user.email }}</a>
@@ -53,6 +60,7 @@
     import { fetchUserPost } from '../services/posts'
     import useUserProfile from '../composables/useUserProfile'
     import { ref, watch } from 'vue';
+import { getFileURL } from '../services/storage';
 
     const posts = ref([]);
     const route = useRoute();

@@ -5,7 +5,7 @@
             <div class="flex items-start justify-between">
                 <div class="text-sm font-semibold text-gray-900">
                     <RouterLink :to="`/usuario/${post.sender_id}`" class="flex items-center">
-                        <img src="" :alt="post.user_profile?.display_name" class="h-10 w-10 rounded-full object-cover border border-gray-200">
+                        <img :src="getFileURL(post.user_profile.avatar_url)" :alt="post.user_profile?.display_name" class="h-10 w-10 rounded-full object-cover border border-gray-200">
                         <div class="ml-3">
                             {{ post.user_profile?.display_name || post.user_profile?.email || post.sender_id }}
                             <div class="text-xs text-gray-500">{{ timeAgo(post.created_at) }}</div>
@@ -48,52 +48,46 @@
     </div>
 </template>
 
-<script>
-export default {
-    name: "Post",
-    props: {
+<script setup>
+    import { ref } from 'vue';
+    import { getFileURL } from '../../services/storage';
+
+    defineProps({
         post: {
             type: Object,
             required: true
         }
-    },
-    methods: {
-        // funcion para decir hace cuanto se publico
-        timeAgo(date) {
-            const ahora = new Date();
-            const fechaPost = new Date(date);
-            const dif = (ahora - fechaPost) / 1000; //saco segundos de diferencia
+    });
+    const hasMedia = ref(false);
 
-            if (dif < 30) { //menos de 30 segundos es justo ahora
-                return 'justo ahora';
-            }
-            else if (dif < 60) {
-                const segundos = Math.floor(dif);
-                return `hace ${segundos} segundo${segundos !== 1 ? 's' : ''}`;
-                //si es mayor a 1, agrego una s, para que diga segundos o segundo, hago lo mismo en los otros
-            }
-            else if (dif < 3600) {
-                const minutos = Math.floor(dif / 60);
-                return `hace ${minutos} minuto${minutos !== 1 ? 's' : ''}`;
-            }
-            else if (dif < 86400) { // google
-                const horas = Math.floor(dif / 3600);
-                return `hace ${horas} hora${horas !== 1 ? 's' : ''}`;
-            }
-            else {
-                const dias = Math.floor(dif / 86400); //tambien google
-                //si es mas de no se cuantos dias, pongo la fecha
-                if (dias < 30) {
-                    return `hace ${dias} día${dias !== 1 ? 's' : ''}`;
-                }
-                return fechaPost.toLocaleDateString() + ' ' + fechaPost.toLocaleTimeString();
-            }
+    function timeAgo(date) {
+        const ahora = new Date();
+        const fechaPost = new Date(date);
+        const dif = (ahora - fechaPost) / 1000; //saco segundos de diferencia
+
+        if (dif < 30) { //menos de 30 segundos es justo ahora
+            return 'justo ahora';
         }
-    },
-    computed:{
-        hasMedia(){
-            return false;
+        else if (dif < 60) {
+            const segundos = Math.floor(dif);
+            return `hace ${segundos} segundo${segundos !== 1 ? 's' : ''}`;
+            //si es mayor a 1, agrego una s, para que diga segundos o segundo, hago lo mismo en los otros
+        }
+        else if (dif < 3600) {
+            const minutos = Math.floor(dif / 60);
+            return `hace ${minutos} minuto${minutos !== 1 ? 's' : ''}`;
+        }
+        else if (dif < 86400) { // google
+            const horas = Math.floor(dif / 3600);
+            return `hace ${horas} hora${horas !== 1 ? 's' : ''}`;
+        }
+        else {
+            const dias = Math.floor(dif / 86400); //tambien google
+            //si es mas de no se cuantos dias, pongo la fecha
+            if (dias < 30) {
+                return `hace ${dias} día${dias !== 1 ? 's' : ''}`;
+            }
+            return fechaPost.toLocaleDateString() + ' ' + fechaPost.toLocaleTimeString();
         }
     }
-}
 </script>

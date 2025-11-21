@@ -108,7 +108,13 @@ export async function logout() {
         // console.error('Logout error:', error.message);
         throw new Error( error.message );
     }
-    setUser({id: null, email: null});
+    setUser({
+        id: null, 
+        email: null,
+        avatar_url: null,
+        display_name: null,
+        bio: null,
+    });
 }
 
 /**
@@ -122,7 +128,9 @@ export async function updateAuthUser(data){
         await updateUserProfile(user.id, data);
         setUser({
             display_name: data.display_name ?? user.display_name,
-            bio: data.bio ?? user.bio
+            bio: data.bio ?? user.bio,
+            avatar_url: data.avatar_url ?? user.avatar_url,
+
         });
     } catch (error) {
         throw new Error(error.message);
@@ -135,8 +143,10 @@ export async function updateAuthUser(data){
  */
 export async function updateAuthUserAvatar(file){
     try {
-        const filename = `${user.id}/avatar.jpg`;
+        const filename = `${user.id}/${crypto.randomUUID()}.jpg`;
         await uploadFile(filename, file);
+        await updateUserProfile(user.id, { avatar_url: filename });
+
         setUser({
             avatar_url: filename
         })

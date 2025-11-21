@@ -6,6 +6,15 @@
                 <div class="col-span-4 sm:col-span-3">
                     <div class="bg-white shadow rounded-lg p-6">
                         <div class="flex flex-col items-center">
+                            <div class="mb-4">
+                                <img 
+                                    :src="getFileURL(user.avatar_url)" 
+                                    alt="Vista previa de la imagen"
+                                    class="w-32 h-32 object-cover rounded-full border border-gray-300"
+                                >
+                            </div>
+                        </div>
+                        <div class="flex flex-col items-center">
                             <h2 class="text-xl font-bold">{{ form.display_name || "Sin nombre aún" }}</h2>
                             <p class="text-gray-700">{{ form.email }}</p>
                         </div>
@@ -46,6 +55,7 @@
 <script setup>
     import { useAuthUserState } from '../composables/useAuthUserState';
     import { useUserProfileEdit } from '../composables/useUserProfileEdit';
+    import { getFileURL } from '../services/storage';
 
     const { user } = useAuthUserState();
     const { form, loading, successMessage, errorMessage, handleSubmit } = useUserProfileEdit(user);

@@ -6,6 +6,15 @@
                 <div class="col-span-4 sm:col-span-3">
                     <div class="bg-white shadow rounded-lg p-6">
                         <div class="flex flex-col items-center">
+                            <div class="mb-4">
+                                <img 
+                                    :src="imageData.preview || getFileURL(user.avatar_url)" 
+                                    alt="Vista previa de la imagen"
+                                    class="w-32 h-32 object-cover rounded-full border border-gray-300"
+                                >
+                            </div>
+                        </div>
+                        <div class="flex flex-col items-center">
                             <h2 class="text-xl font-bold">{{ user.display_name }}</h2>
                             <p class="text-gray-700">{{ user.email }}</p>
                         </div>
@@ -19,10 +28,10 @@
                 <!-- Formulario de edición -->
                 <div class="col-span-4 sm:col-span-9">
                     <div class="bg-white shadow rounded-lg p-6">
-                        <h3 class="text-lg font-semibold mb-4">Actualizar mi Imagen</h3>
+                        <h3 class="text-lg font-semibold mb-4">Actualizar mi imagen</h3>
                         <form @submit.prevent="handleSubmit">
                            <div class="mb-4">
-                                <label class="block text-gray-700 mb-1" for="avatar">Imagen</label>
+                                <label class="sr-only" for="avatar">Imagen</label>
                                 <input @change="handleImageChange" id="avatar" name="avatar" type="file" class="w-full border border-gray-300 rounded px-3 py-2" />
                             </div>
                             <div class="flex justify-end">
@@ -34,15 +43,25 @@
                         <p v-if="successMessage" class="text-green-600 mt-4">{{ successMessage }}</p>
                         <p v-if="errorMessage" class="text-red-600 mt-4">{{ errorMessage }}</p>
                     </div>
+                    <p class="text-gray-600 mt-4 text-sm">
+                        Para garantizar una carga correcta, la imagen debe cumplir con los requisitos del servicio de almacenamiento de Supabase: 
+                        formatos permitidos (JPG, PNG o WEBP), un tamaño de archivo adecuado para evitar rechazos por límite de peso y 
+                        un nombre sin caracteres especiales que puedan generar inconvenientes. 
+                        Si alguno de estos parámetros no se respeta, la carga podría fallar.
+                    </p>
+                    <p class="text-gray-500 mt-2 text-xs">
+                        En caso de error, se recomienda verificar nuevamente el formato, peso y estado del archivo antes de intentar realizar otra carga.
+                    </p>
                 </div>
             </div>
         </div>
     </div>
 </template>
 <script setup>
-    import { ref } from 'vue';
+    import { onUnmounted, ref } from 'vue';
     import { useAuthUserState } from '../composables/useAuthUserState';
     import { updateAuthUserAvatar } from '../services/auth';
+    import { getFileURL } from '../services/storage';
 
     const { user } = useAuthUserState();
     const { imageData, loading, handleSubmit, handleImageChange, successMessage, errorMessage } = useProfileEditAvatarForm(user);
@@ -59,12 +78,13 @@
             preview: null
         });
 
-        function handleSubmit() {
+        async function handleSubmit() {
             try {
                 loading.value = true;
-                updateAuthUserAvatar(imageData.value.file);
+                await updateAuthUserAvatar(imageData.value.file);
             } catch (error) {
-                errorMessage.value = 'Error al actualizar la imagen de perfil.';
+                errorMessage.value = 'Error al actualizar la imagen de perfil. ' + error.message;
+                loading.value = false;
                 return;
             }
             loading.value = false;
@@ -72,13 +92,20 @@
         }
 
         function handleImageChange(event){
-            const file = event.target.files[0];
-            if(!file){
-                imageData.value = { file: null, preview: null };
-                return;
+            imageData.value.file = event.target.files[0];
+            if (imageData.value.preview) {
+                URL.revokeObjectURL(imageData.value.preview);
+                imageData.value.preview = null;
             }
-            imageData.value.file = file;
+            imageData.value.preview = URL.createObjectURL(imageData.value.file);
+
         }
+
+        onUnmounted(() => {
+            if (imageData.value.preview) {
+                URL.revokeObjectURL(imageData.value.preview);
+            }
+        });
 
         return {
             imageData,
