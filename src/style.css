@@ -47,7 +47,7 @@ footer{
 /* Home */
 
 .background {
-    background-image: url('../assets/img/debbies_blue_umbrella.jpg');
+    background-image: url('../public/img/debbies_blue_umbrella.jpg');
     @apply bg-gray-100 h-[80vh] bg-cover bg-center bg-fixed;
     position: relative;
     overflow: hidden;
@@ -62,7 +62,7 @@ footer{
 
 .rain {
     @apply absolute top-0 left-0 w-full h-full pointer-events-none;
-    background-image: url('../assets/img/lluvia.png');
+    background-image: url('../public/img/lluvia.png');
     background-size: cover;
     background-repeat: no-repeat;
     background-position: center;

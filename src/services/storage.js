@@ -39,8 +39,8 @@ export async function deleteFile(name, bucket = 'avatars'){
 
 export function getFileURL(name, bucket = 'avatars'){
     if(!name){
-        return '../../assets/img/avatar_not_found.png';
+        return '../../public/img/avatar_not_found.png';
     }
     
-    return supabase.storage.from(bucket).getPublicUrl(name).data.publicUrl || '../../assets/img/avatar_not_found.png';
+    return supabase.storage.from(bucket).getPublicUrl(name).data.publicUrl || '../../public/img/avatar_not_found.png';
 }
