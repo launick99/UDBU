@@ -1,6 +1,5 @@
 <template>
-    <div class="max-w-7xl mx-auto flex flex-col lg:flex-row">
-        <SideNavbarLeft class="p-4"></SideNavbarLeft>
+    <div class="max-w-2xl mx-auto flex flex-col lg:flex-row">
         <div class="flex-1 p-4">
             <div class="mx-auto px-4 w-full">
                 <form @submit.prevent="handleSubmit" class="bg-white rounded-xl shadow-sm border border-gray-200 p-4 mb-4">
@@ -41,7 +40,7 @@
                         </button>
                     </div>
                 </form>
-                <div class="max-w-7xl flex flex-row justify-content-between container mx-auto">
+                <div class="flex flex-row justify-content-between container mx-auto">
                     <!-- lista de posts -->
                     <div class="w-full post-list space-y-4 mb-4">
                         <div v-if="posts.length === 0" class="flex justify-center w-full">
@@ -52,14 +51,11 @@
                 </div>
             </div>
         </div>
-        <SideNavbarRight class="p-4"></SideNavbarRight>
     </div>
 </template>
 
 
 <script setup>
-    import SideNavbarLeft from '../components/Navegation/SideNavbarLeft.vue';
-    import SideNavbarRight from '../components/Navegation/SideNavbarRight.vue';
     import Post from '../components/Posts/Post.vue';
     import { useAuthUserState } from '../composables/useAuthUserState';
     import { usePostCreation } from '../composables/usePostCreation';

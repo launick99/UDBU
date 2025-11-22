@@ -51,7 +51,7 @@ export async function fetchPostReplies(parentPostId) {
             )
         `)
         .eq('parent_post_id', parentPostId)
-        .order('created_at', { ascending: true });
+        .order('created_at', { ascending: false });
     
     if (error) {
         throw new Error(`Error al obtener respuestas: ${error.message}`);

@@ -1,15 +1,8 @@
-import { ref, computed } from 'vue';
-import { createReply } from '../services/replies';
+import { ref, computed, watch } from 'vue';
+import { createReply, fetchReply } from '../services/replies';
 import { createPostMedia } from '../services/media';
 import { uploadFile } from '../services/storage';
 
-/**
- * Composable para crear respuestas con imagen opcional.
- * 
- * @param {Object} user - Objeto del usuario
- * @param {String} parentPostId - ID del post al que se está respondiendo
- * @returns {Object}
- */
 export function useReplyCreation(user, parentPostId) {
     const newReply = ref({
         content: null,
@@ -21,79 +14,74 @@ export function useReplyCreation(user, parentPostId) {
     const errorMessage = ref("");
     const successMessage = ref("");
 
-    /**
-     * Valida que hay contenido o archivo para enviar
-     */
     const canSubmit = computed(() => {
         return newReply.value.content && newReply.value.content.trim().length > 0;
     });
 
-    /**
-     * Maneja la selección de archivo de imagen
-     */
     const handleFileChange = (event) => {
-        const files = Array.from(event.target.files || []);
-        const file = files.length > 0 ? files[0] : null;
+        const file = event.target.files?.[0] || null;
         newReply.value.file = file;
 
-        if (preview.value) URL.revokeObjectURL(preview.value);
+        if(preview.value) URL.revokeObjectURL(preview.value);
         preview.value = file ? URL.createObjectURL(file) : null;
-        
-        try { event.target.value = null; } catch(e){}
+
+        try{ 
+            event.target.value = null;
+        } catch {
+            // nada
+        }
     };
 
-    /**
-     * Elimina la imagen seleccionada y su preview
-     */
     const removePreview = () => {
-        if (preview.value) URL.revokeObjectURL(preview.value);
+        if(preview.value){
+            URL.revokeObjectURL(preview.value);
+        }
         preview.value = null;
         newReply.value.file = null;
+    };
+
+    const resetForm = () => {
+        newReply.value.content = null;
+        removePreview();
     };
 
     const handleSubmit = async () => {
         errorMessage.value = "";
         successMessage.value = "";
 
-        if (!canSubmit.value) {
-            errorMessage.value = "Escribe algo o agrega una imagen.";
-            return;
-        }
-
-        // Validar que content no sea null o vacío
-        const contentText = newReply.value.content ? newReply.value.content.trim() : "";
-        if (!contentText) {
-            errorMessage.value = "El contenido de la respuesta no puede estar vacío.";
-            return;
-        }
-
         try {
             loading.value = true;
 
             let mediaFilename = null;
+
             if (newReply.value.file) {
                 const file = newReply.value.file;
                 const ext = file.name.split('.').pop();
                 mediaFilename = `${user.value.id}/${crypto.randomUUID()}.${ext}`;
                 await uploadFile(mediaFilename, file, 'posts');
             }
-
-            const replyData = await createReply({ 
-                sender_id: user.value.id, 
-                content: contentText,
-                parent_post_id: parentPostId
+            const replyData = await createReply({
+                sender_id: user.value.id,
+                content: newReply.value.content.trim(),
+                parent_post_id: parentPostId.value
             });
 
             if (!replyData || replyData.length === 0) {
-                throw new Error("Error: No se pudo crear la respuesta.");
+                throw new Error("No se pudo crear la respuesta.");
             }
+
+            const replyId = replyData[0].id;
+
             if (mediaFilename) {
-                const replyId = replyData[0].id;
                 await createPostMedia(replyId, mediaFilename);
             }
 
+            let reply = await fetchReply(replyId);
+
             successMessage.value = "Respuesta creada exitosamente.";
             resetForm();
+
+            return reply;
 
         } catch (error) {
             errorMessage.value = error.message || "Error al crear la respuesta.";
@@ -102,16 +90,12 @@ export function useReplyCreation(user, parentPostId) {
             loading.value = false;
         }
     };
-
-    /**
-     * Limpia el formulario después de enviar
-     */
-    const resetForm = () => {
-        newReply.value.content = null;
-        newReply.value.file = null;
-        if (preview.value) URL.revokeObjectURL(preview.value);
-        preview.value = null;
-    };
+    
+    watch(parentPostId, () => {
+        resetForm();
+        errorMessage.value = "";
+        successMessage.value = "";
+    });
 
     return {
         newReply,

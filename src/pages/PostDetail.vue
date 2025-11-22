@@ -1,47 +1,20 @@
 <template>
     <div class="max-w-7xl mx-auto flex flex-col lg:flex-row">
-        <SideNavbarLeft class="p-4"></SideNavbarLeft>
         <div class="flex-1 p-4">
             <div class="mx-auto px-4 w-full max-w-2xl">
-                <div class="mb-4">
-                    <RouterLink to="/posts" class="text-blue-600 hover:text-blue-700 font-medium text-sm flex items-center">
-                        <i class="fa-solid fa-arrow-left mr-2"></i>
-                        Volver
-                    </RouterLink>
-                </div>
-                <div v-if="post" class="bg-white rounded-xl shadow-sm border border-gray-200 mb-6 overflow-hidden">
-                    <div class="p-4">
-                        <div class="flex items-start justify-between">
-                            <div class="text-sm font-semibold text-gray-900">
-                                <RouterLink :to="`/usuario/${post.sender_id}`" class="flex items-center">
-                                    <img :src="getFileURL(post.user_profile?.avatar_url)" :alt="post.user_profile?.display_name" class="h-10 w-10 rounded-full object-cover border border-gray-200">
-                                    <div class="ml-3">
-                                        {{ post.user_profile?.display_name || post.user_profile?.email || post.sender_id }}
-                                        <div class="text-xs text-gray-500">{{ timeAgo(post.created_at) }}</div>
-                                    </div>
-                                </RouterLink>
-                            </div>
-                        </div>
-                        <div class="mt-3">
-                            <p class="text-gray-800 text-base">
-                                {{ post.content }}
-                            </p>
-                        </div>
-                        <div class="mt-3 -mx-4" v-if="hasMedia">
-                            <img :src="getFileURL(post.post_media[0].media, 'posts')" alt="Post" class="w-full h-auto max-h-[500px] object-cover">
-                        </div>
-                        <div class="mt-3 pt-2 border-t border-gray-100 flex justify-between text-xs text-gray-500">
-                            <span>24 Me Gusta</span><span>{{ replies.length }} Comentarios</span>
-                        </div>
-                    </div>
-                </div>
-                <form v-if="post" @submit.prevent="handleSubmitReply" class="bg-white rounded-xl shadow-sm border border-gray-200 p-4 mb-6">
-                    <div v-if="errorMessageReply" class="mb-3 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
+                <button @click="goBack" class="mb-4 text-blue-600 hover:text-blue-700 font-medium text-sm flex items-center">
+                    <i class="fa-solid fa-arrow-left mr-2"></i>
+                    Volver
+                </button>
+                <Post v-if="post" :post="post" />
+                <form v-if="post" @submit.prevent="handleSubmitReply" class="mt-[-2rem] bg-white rounded-b-xl shadow-sm border border-gray-200 p-4 mb-6">
+                    <!-- TODO: ver que quede lindo -->
+                    <!-- <div v-if="errorMessageReply" class="mb-3 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
                         {{ errorMessageReply }}
                     </div>
                     <div v-if="successMessageReply" class="mb-3 p-3 bg-green-50 border border-green-200 rounded-lg text-green-700 text-sm">
                         {{ successMessageReply }}
-                    </div>
+                    </div> -->
                     <div class="flex items-center mb-3">
                         <img :src="getFileURL(user.avatar_url)" :alt="user.display_name" class="h-10 w-10 rounded-full object-cover border border-gray-200 mr-3">
                         <textarea class="form-textarea" placeholder="¿Qué respondes?" type="text" v-model="newReply.content"></textarea>
@@ -84,22 +57,19 @@
                 </div>
             </div>
         </div>
-        <SideNavbarRight class="p-4"></SideNavbarRight>
     </div>
 </template>
 
 <script setup>
     import { ref, computed, onMounted, watch } from 'vue';
-    import { useRoute } from 'vue-router';
-    import SideNavbarLeft from '../components/Navegation/SideNavbarLeft.vue';
-    import SideNavbarRight from '../components/Navegation/SideNavbarRight.vue';
+    import { useRoute, useRouter } from 'vue-router';
     import Reply from '../components/Posts/Reply.vue';
     import { useAuthUserState } from '../composables/useAuthUserState';
     import { useReplyCreation } from '../composables/useReplyCreation';
     import { useRepliesList } from '../composables/useRepliesList';
     import { getFileURL } from '../services/storage';
     import { fetchPost } from '../services/posts';
-    import { timeAgo } from '../composables/useTimeAgo';
+    import Post from '../components/Posts/Post.vue';
 
     const route = useRoute();
     const postId = ref(route.params.id);
@@ -118,7 +88,7 @@
         handleFileChange,
         removePreview,
         handleSubmit: handleSubmitReplyComposable
-    } = useReplyCreation(user, postId.value);
+    } = useReplyCreation(user, postId);
 
     const {
         replies,
@@ -126,11 +96,16 @@
     } = useRepliesList(postId);
 
     /**
-     * Valida si el post tiene imagen
+     * Navega hacia atrás o a la lista de posts si no hay historial
+     * (para cuando accede a un una respuesta volver al post)
      */
-    const hasMedia = computed(() => 
-        post.value && Array.isArray(post.value.post_media) && post.value.post_media.length > 0
-    );
+    function goBack() {
+        if (window.history.length > 1) {
+            window.history.back();
+        } else {
+            useRouter.push('/posts');
+        }
+    }
 
     /**
      * Carga el post específico
@@ -150,7 +125,15 @@
      * Maneja el envío de respuesta
      */
     const handleSubmitReply = async () => {
-        await handleSubmitReplyComposable();
+        const created = await handleSubmitReplyComposable();
+        if (created) {
+            try {
+                const exists = replies.value.find(r => r.id === created.id);
+                if (!exists) replies.value.unshift(created);
+            } catch (e) {
+                console.error('Error agregando respuesta localmente:', e);
+            }
+        }
     };
 
     onMounted(() => {

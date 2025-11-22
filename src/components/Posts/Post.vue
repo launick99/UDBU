@@ -1,5 +1,5 @@
 <template>
-    <div class="max-w-2xl bg-white rounded-xl shadow-sm border border-gray-200 mb-4 overflow-hidden transition-all duration-300 hover:shadow-md w-full">
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 mb-4 overflow-hidden transition-all duration-300 hover:shadow-md w-full">
         <div class="p-4">
             <div class="flex items-start justify-between">
                 <div class="text-sm font-semibold text-gray-900">
@@ -27,30 +27,28 @@
             </div>
             <!-- Cantida de likes, comentarios -->
             <div class="mt-3 pt-2 border-t border-gray-100 flex justify-between text-xs text-gray-500">
-                <span>24 Me Gusta</span><span>{{ post.replies_count || 0 }} Comentarios</span>
+                <span>{{ post.likes_count ?? 0 }} Me Gusta</span><span>{{ post.replies_count || 0 }} Comentarios</span>
             </div>
-            <div class="mt-2 pt-2 border-t border-gray-100 flex justify-between">
-                <button class="flex items-center justify-center w-1/3 py-2 text-sm font-medium rounded-lg transition-colors text-gray-500 hover:bg-gray-50">
-                    <i class="fa-regular fa-heart text-gray-500 fa-xl w-8 mr-3"></i>
-                    <span>Me Gusta</span>
+            <div class="mt-2 pt-2 border-t border-gray-100 flex gap-10">
+                <button @click.prevent="toggleLike" class="flex items-center py-2 text-sm font-medium rounded-lg transition-colors text-gray-500 hover:bg-gray-50">
+                    <i :class="[ post.liked_by_user ? 'fa-solid text-red-500' : 'fa-regular', 'fa-heart', 'fa-xl', 'w-6', 'mr-1' ]" :aria-pressed="post.liked_by_user"></i>
+                    <span class="w-20">{{ post.liked_by_user ? 'Te gusta' : 'Me gusta' }}</span>
                 </button>
-                <RouterLink :to="`/post/${post.id}`" class="flex items-center justify-center w-1/3 py-2 text-sm font-medium rounded-lg transition-colors text-gray-500 hover:bg-gray-50">
-                    <i class="fa-regular fa-comment text-gray-500 fa-xl w-8 mr-3"></i>
-                    <span>Comentar</span>
+                <RouterLink :to="`/post/${post.id}`" class="flex items-center py-2 text-sm font-medium rounded-lg transition-colors text-gray-500 hover:bg-gray-50">
+                    <i class="fa-regular fa-comment text-gray-500 fa-xl w-6 mr-1"></i>
+                    <span class="w-20">Comentar</span>
                 </RouterLink>
-                <button class="flex items-center justify-center w-1/3 py-2 text-sm font-medium rounded-lg transition-colors text-gray-500 hover:bg-gray-50">
-                    <i class="fa-regular fa-share-from-square text-gray-500 fa-xl w-8 mr-3"></i>
-                    <span>Compartir</span>
-                </button>
             </div>
         </div>
     </div>
 </template>
 
 <script setup>
-    import { computed } from 'vue';
+    import { computed, onMounted } from 'vue';
     import { getFileURL } from '../../services/storage';
     import { timeAgo } from '../../composables/useTimeAgo';
+    import { useAuthUserState } from '../../composables/useAuthUserState';
+    import { likePost, unlikePost, getPostLikes, userLikedPost } from '../../services/posts';
 
     const props = defineProps({
         post: {
@@ -63,5 +61,31 @@
         Array.isArray(props.post.post_media) && props.post.post_media.length > 0
     );
 
-    if (typeof props.post.replies_count !== 'number') props.post.replies_count = 0;
+    const { user } = useAuthUserState();
+    onMounted(async () => {
+        props.post.likes_count = await getPostLikes(props.post.id);
+        try {
+            if (user.value) {
+                props.post.liked_by_user = await userLikedPost(props.post.id, user.value.id);
+            }
+        } catch (error) {
+            props.post.liked_by_user = false;
+        }
+    });
+
+    const toggleLike = async () => {
+        try {
+            if (props.post.liked_by_user) {
+                await unlikePost(props.post.id, user.value.id);
+                props.post.likes_count = (props.post.likes_count || 1) - 1;
+                props.post.liked_by_user = false;
+            } else {
+                await likePost(props.post.id, user.value.id);
+                props.post.likes_count = (props.post.likes_count || 0) + 1;
+                props.post.liked_by_user = true;
+            }
+        } catch (error) {
+            console.error('Error al dar/quitar like:', error);
+        }
+    };
 </script>

@@ -1,5 +1,5 @@
 import { ref, onMounted, onUnmounted } from 'vue';
-import { fetchGlobalPost, fetchUserPost, subscribeToGlobalPostNewPosts, fetchPost } from '../services/posts';
+import { fetchGlobalPost, fetchUserPost, subscribeToGlobalPostNewPosts, fetchPost, getPostLikes } from '../services/posts';
 import { fetchPostReplies } from '../services/replies';
 
 /**
@@ -16,7 +16,7 @@ export function usePostsList() {
     let unsubscribe = () => {};
 
     /**
-     * Carga los posts iniciales según el tipo
+     * Carga los posts
      */
     const loadPosts = async () => {
         try {
@@ -29,6 +29,11 @@ export function usePostsList() {
                     try {
                         const replies = await fetchPostReplies(p.id);
                         p.replies_count = Array.isArray(replies) ? replies.length : 0;
+                        try {
+                            p.likes_count = await getPostLikes(p.id);
+                        } catch {
+                            p.likes_count = p.likes_count || 0;
+                        }
                     } catch (e) {
                         p.replies_count = 0;
                     }
@@ -63,7 +68,6 @@ export function usePostsList() {
                             posts.value.unshift(newPostData);
                         }
                     } else {
-                        // Es una respuesta: actualizar el contador del post padre si está en la lista
                         const parentId = newPostData.parent_post_id;
                         const idx = posts.value.findIndex(p => p.id === parentId);
                         if (idx !== -1) {

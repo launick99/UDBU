@@ -1,5 +1,7 @@
 import { ref, onMounted, onUnmounted, watch } from 'vue';
 import { fetchPostReplies, subscribeToPostReplies, fetchReply } from '../services/replies';
+import { getPostLikes, userLikedPost } from '../services/posts';
+import { useAuthUserState } from './useAuthUserState';
 
 /**
  * Composable para obtener y mantener sincronizado un listado de respuestas.
@@ -18,6 +20,8 @@ export function useRepliesList(parentPostId) {
     /**
      * Carga las respuestas iniciales
      */
+    const { user } = useAuthUserState();
+
     const loadReplies = async () => {
         try {
             loading.value = true;
@@ -28,6 +32,19 @@ export function useRepliesList(parentPostId) {
                     try {
                         const nested = await fetchPostReplies(r.id);
                         r.replies_count = Array.isArray(nested) ? nested.length : 0;
+                        try {
+                            r.likes_count = await getPostLikes(r.id);
+                        } catch {
+                            r.likes_count = r.likes_count || 0;
+                        }
+
+                        try {
+                            if (user.value && typeof r.liked_by_user !== 'boolean') {
+                                r.liked_by_user = await userLikedPost(r.id, user.value.id);
+                            }
+                        } catch {
+                            r.liked_by_user = false;
+                        }
                     } catch {
                         r.replies_count = 0;
                     }
@@ -48,20 +65,28 @@ export function useRepliesList(parentPostId) {
         try {
             unsubscribe = subscribeToPostReplies(parentId.value, async (newReplyData) => {
                 try {
-                    const enrichedReply = await fetchReply(newReplyData.id);
+                    const reply = await fetchReply(newReplyData.id);
 
                     try {
-                        const nested = await fetchPostReplies(enrichedReply.id);
-                        enrichedReply.replies_count = Array.isArray(nested) ? nested.length : 0;
-                    } catch {
-                        enrichedReply.replies_count = 0;
-                    }
+                        const nested = await fetchPostReplies(reply.id);
+                        reply.replies_count = Array.isArray(nested) ? nested.length : 0;
+                        reply.likes_count = await getPostLikes(reply.id);
 
-                    replies.value.push(enrichedReply);
+                        try {
+                            if (user.value) {
+                                reply.liked_by_user = await userLikedPost(reply.id, user.value.id);
+                            }
+                        } catch {
+                            reply.liked_by_user = false;
+                        }
+                    } catch {
+                        reply.replies_count = 0;
+                    }
+                    replies.value.unshift(reply);
                 } catch (error) {
                     console.error("[Realtime enrich reply] Error:", error);
                     newReplyData.replies_count = 0;
-                    replies.value.push(newReplyData);
+                    replies.value.unshift(reply);
                 }
             });
         } catch (error) {

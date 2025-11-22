@@ -159,9 +159,161 @@ export async function fetchPost(postId) {
         .single();
     
     if (error) {
-        console.error('Error fetching post with relations:', error.message);
-        throw new Error(`Error fetching post: ${error.message}`);
+        console.error('[posts.js fetchPost] Error al obtener el post:', error.message);
+        throw new Error(`[posts.js fetchPost] Error al obtener el post: ${error.message}`);
     }
 
     return data;
+}
+
+/**
+ * Sistema de likes
+ * @param {number} postId 
+ * @param {string} userId
+ */
+export async function likePost(postId, userId) {
+    const payload = { post_id: postId, user_id: userId };
+
+    const { data, error } = await supabase
+        .from('likes')
+        .insert(payload)
+        .select();
+
+    if (error) {
+        throw new Error(`[posts.js likePost] Error al dar like: ${error.message}`);
+    }
+
+    return data;
+}
+
+/**
+ * 
+ * Deslikea un post
+ * 
+ * @param {number} postId 
+ * @param {string} userId 
+ * @returns 
+ */
+export async function unlikePost(postId, userId) {
+    const { data, error } = await supabase
+        .from('likes')
+        .delete()
+        .eq('post_id', postId)
+        .eq('user_id', userId)
+        .select();
+
+    if (error) {
+        throw new Error(`[posts.js unlikePost] Error al quitar like: ${error.message}`);
+    }
+
+    return data;
+}
+
+/**
+ * 
+ * Obtiene los likes de un post
+ * 
+ * @param {number} postId 
+ * @returns 
+ */
+export async function getPostLikes(postId) {
+    const { data, error, count } = await supabase
+        .from('likes')
+        .select('id', { count: 'exact' })
+        .eq('post_id', postId);
+
+    if (error) {
+        console.error('[posts.js getPostLikes] Error al likes de un post:', error.message);
+        return Array.isArray(data) ? data.length : 0;
+    }
+
+    if (typeof count === 'number') return count;
+    return Array.isArray(data) ? data.length : 0;
+}
+
+/**
+ * 
+ * Obtiene los likes de un post por un usuario específico
+ * 
+ * @param {number} postId 
+ * @param {string} userId 
+ * @returns 
+ */
+export async function userLikedPost(postId, userId) {
+    const { data, error } = await supabase
+        .from('likes')
+        .select('id')
+        .eq('post_id', postId)
+        .eq('user_id', userId)
+        .limit(1);
+
+    if (error) {
+        console.error('[posts.js userLikedPost] Error al checkear likes:', error.message);
+        return false;
+    }
+
+    return Array.isArray(data) && data.length > 0;
+}
+
+
+/**
+ * Trae las respuestas por un usuario
+ * @param {string} userId
+ * @returns {Promise<Array<Object>>}
+ */
+export async function fetchUserReplies(userId) {
+    const { data, error } = await supabase
+        .from('posts')
+        .select(`
+            *,
+            user_profile:sender_id (
+                id,
+                display_name,
+                email,
+                avatar_url
+            ),
+            post_media (
+                id,
+                media,
+                created_at,
+                updated_at
+            )
+        `)
+        .eq('sender_id', userId)
+        .not('parent_post_id', 'is', null)
+        .order('created_at', { ascending: false });
+
+    if (error) {
+        throw new Error(`[posts.js fetchUserReplies] Error al obtener respuestas del usuario: ${error.message}`);
+    }
+
+    return data;
+}
+
+/**
+ * Trae los posts que un usuario ha marcado con like.
+ * @param {string} userId
+ * @returns {array}
+ */
+export async function fetchUserLikes(userId) {
+    const { data: likesData, error: likesError } = await supabase
+        .from('likes')
+        .select('post_id')
+        .eq('user_id', userId);
+
+    if (likesError) {
+        throw new Error(`[posts.js fetchUserLikes] Error al obtener likes del usuario: ${likesError.message}`);
+    }
+
+    if (!Array.isArray(likesData) || likesData.length === 0) return [];
+
+    try {
+        const posts = await Promise.all(likesData.map(async (l) => {
+            return await fetchPost(l.post_id);
+        }));
+        return posts.filter(Boolean);
+    } catch (e) {
+        console.error('[posts.js fetchUserLikes] Error al obtener likes del usuario:', e);
+        return [];
+    }
 }
