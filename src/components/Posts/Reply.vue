@@ -1,6 +1,6 @@
 <template>
     <div class="border-l-2 border-gray-200 pl-4 ml-2 mb-3">
-        <div class="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden transition-all duration-300 hover:shadow-sm">
+        <RouterLink :to="`/post/${reply.id}`" class="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden transition-all duration-300 hover:shadow-sm">
             <div class="p-3">
                 <div class="flex items-start justify-between">
                     <div class="text-sm font-semibold text-gray-900">
@@ -17,6 +17,7 @@
                 <div class="mt-2">
                     <p class="text-gray-800 text-sm">{{ reply.content }}</p>
                 </div>
+
                 <div class="mt-2 -mx-3" v-if="hasMedia">
                     <img :src="getFileURL(reply.post_media[0].media, 'posts')" alt="Reply" class="w-full h-auto max-h-[300px] object-cover rounded">
                 </div>
@@ -35,7 +36,7 @@
                     <div class="text-xs text-gray-600">{{ reply.replies_count ?? 0 }} respuestas</div>
                 </div>
             </div>
-        </div>
+        </RouterLink>
     </div>
 </template>
 
@@ -47,9 +48,12 @@
     import { likePost, unlikePost, getPostLikes, userLikedPost } from '../../services/posts';
 
     const props = defineProps({ reply: { type: Object, required: true } });
+    
+    const emit = defineEmits(['reply-deleted']);
+    
     const hasMedia = computed(() => Array.isArray(props.reply.post_media) && props.reply.post_media.length > 0);
-
     const { user } = useAuthUserState();
+    const showMenu = ref(false);
 
     onMounted(async () => {
         try {

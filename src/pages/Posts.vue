@@ -46,7 +46,7 @@
                         <div v-if="posts.length === 0" class="flex justify-center w-full">
                             <div class="loader"></div>
                         </div>
-                        <Post v-for="post in posts" :key="post.id" :post="post" />
+                        <Post v-for="post in posts" :key="post.id" :post="post" @post-deleted="handlePostDeleted" />
                     </div>
                 </div>
             </div>
@@ -80,4 +80,12 @@
         loading,
         refresh
     } = usePostsList();
+
+    const handlePostDeleted = (postId) => {
+        const index = posts.value.findIndex(p => p.id === postId);
+        if (index !== -1) {
+            posts.value.splice(index, 1);
+        }
+    };
+
 </script>

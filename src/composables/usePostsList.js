@@ -58,6 +58,10 @@ export function usePostsList() {
             unsubscribe = subscribeToGlobalPostNewPosts(async (newPostData) => {
                 try {
                     if (!newPostData.parent_post_id) {
+                        // TODO: mostrar como eliminado (estilo twitter)
+                        if (newPostData.is_deleted) {
+                            return;
+                        }
                         try {
                             const post = await fetchPost(newPostData.id);
                             post.replies_count = post.replies_count || 0;

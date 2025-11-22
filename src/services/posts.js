@@ -34,6 +34,7 @@ export async function postGlobalnNewPost({sender_id, content}) {
  * Trae todas las publicaciones globales, ordenadas por fecha (como twitter).
  * Solo trae posts principales (sin parent_post_id).
  * Incluye la información del usuario y sus archivos de media asociados.
+ * Excluye posts eliminados (soft delete).
  *
  * @returns {Promise<Array>}
  * @throws {Error}
@@ -57,6 +58,7 @@ export async function fetchGlobalPost() {
             )
         `)
         .is('parent_post_id', null)
+        .eq('is_deleted', false)
         .order('created_at', { ascending: false });
     
     if (error) {
@@ -69,6 +71,7 @@ export async function fetchGlobalPost() {
 
 /**
  * Trae todas las publicaciones de un usuario (solo posts principales).
+ * Excluye posts eliminados (soft delete).
  *
  * @param {string} id
  * @returns {Promise<Array<Object>>} - Lista de publicaciones del usuario.
@@ -94,6 +97,7 @@ export async function fetchUserPost(id) {
         `)
         .eq('sender_id', id)
         .is('parent_post_id', null)
+        .eq('is_deleted', false)
         .order('created_at', { ascending: false });
     
     if (error) {
@@ -258,6 +262,8 @@ export async function userLikedPost(postId, userId) {
 
 /**
  * Trae las respuestas por un usuario
+ * Excluye respuestas eliminadas
+ * 
  * @param {string} userId
  * @returns {Promise<Array<Object>>}
  */
@@ -281,6 +287,7 @@ export async function fetchUserReplies(userId) {
         `)
         .eq('sender_id', userId)
         .not('parent_post_id', 'is', null)
+        .eq('is_deleted', false)
         .order('created_at', { ascending: false });
 
     if (error) {
@@ -316,4 +323,46 @@ export async function fetchUserLikes(userId) {
         console.error('[posts.js fetchUserLikes] Error al obtener likes del usuario:', e);
         return [];
     }
+}
+
+/**
+ * Actualiza el contenido de un post
+ * @param {string} postId - ID del post a actualizar
+ * @param {string} content - Nuevo contenido del post
+ * @returns {Promise<Object>} - Post actualizado
+ * @throws {Error}
+ */
+export async function updatePost(postId, content) {
+    const { data, error } = await supabase
+        .from('posts')
+        .update({ content: content })
+        .eq('id', postId)
+        .select();
+
+    if (error) {
+        throw new Error(`[posts.js updatePost] Error al actualizar post: ${error.message}`);
+    }
+
+    return data && data.length > 0 ? data[0] : null;
+}
+
+/**
+ * Eliminación lógica de un post
+ * Marca el post como eliminado sin eliminar los registros de la BD
+ * @param {string} postId - ID del post a eliminar
+ * @returns {Promise<Object>} - Post marcado como eliminado
+ * @throws {Error}
+ */
+export async function deletePost(postId) {
+    const { data, error } = await supabase
+        .from('posts')
+        .update({ is_deleted: true })
+        .eq('id', postId)
+        .select();
+
+    if (error) {
+        throw new Error(`[posts.js deletePost] Error al eliminar post: ${error.message}`);
+    }
+
+    return data && data.length > 0 ? data[0] : null;
 }

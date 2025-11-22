@@ -27,6 +27,7 @@ export async function createReply({sender_id, content, parent_post_id}) {
 /**
  * Trae todas las respuestas de un post específico.
  * Incluye la información del usuario y sus archivos de media asociados.
+ * Excluye respuestas eliminadas (soft delete).
  *
  * @param {string} parentPostId - ID del post padre
  * @returns {Promise<Array>}
@@ -51,6 +52,7 @@ export async function fetchPostReplies(parentPostId) {
             )
         `)
         .eq('parent_post_id', parentPostId)
+        .eq('is_deleted', false)
         .order('created_at', { ascending: false });
     
     if (error) {
@@ -120,4 +122,46 @@ export async function fetchReply(replyId) {
     }
 
     return data;
+}
+
+/**
+ * Actualiza el contenido de una respuesta.
+ * @param {string} replyId - ID de la respuesta a actualizar
+ * @param {string} content - Nuevo contenido de la respuesta
+ * @returns {Promise<Object>} - Respuesta actualizada
+ * @throws {Error}
+ */
+export async function updateReply(replyId, content) {
+    const { data, error } = await supabase
+        .from('posts')
+        .update({ content: content })
+        .eq('id', replyId)
+        .select();
+
+    if (error) {
+        throw new Error(`[replies.js updateReply] Error al actualizar respuesta: ${error.message}`);
+    }
+
+    return data && data.length > 0 ? data[0] : null;
+}
+
+/**
+ * Eliminación lógica de una respuesta (soft delete).
+ * Marca la respuesta como eliminada sin eliminar los registros de la BD.
+ * @param {string} replyId - ID de la respuesta a eliminar
+ * @returns {Promise<Object>} - Respuesta marcada como eliminada
+ * @throws {Error}
+ */
+export async function deleteReply(replyId) {
+    const { data, error } = await supabase
+        .from('posts')
+        .update({ is_deleted: true })
+        .eq('id', replyId)
+        .select();
+
+    if (error) {
+        throw new Error(`[replies.js deleteReply] Error al eliminar respuesta: ${error.message}`);
+    }
+
+    return data && data.length > 0 ? data[0] : null;
 }

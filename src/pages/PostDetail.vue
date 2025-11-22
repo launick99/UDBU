@@ -52,6 +52,7 @@
                             v-for="reply in replies"
                             :key="reply.id"
                             :reply="reply"
+                            @reply-deleted="handleReplyDeleted"
                         />
                     </div>
                 </div>
@@ -61,7 +62,7 @@
 </template>
 
 <script setup>
-    import { ref, computed, onMounted, watch } from 'vue';
+    import { ref, onMounted, watch } from 'vue';
     import { useRoute, useRouter } from 'vue-router';
     import Reply from '../components/Posts/Reply.vue';
     import { useAuthUserState } from '../composables/useAuthUserState';
@@ -135,6 +136,14 @@
             }
         }
     };
+
+    const handleReplyDeleted = (replyId) => {
+        const index = replies.value.findIndex(r => r.id === replyId);
+        if (index !== -1) {
+            replies.value.splice(index, 1);
+        }
+    };
+
 
     onMounted(() => {
         loadPost();

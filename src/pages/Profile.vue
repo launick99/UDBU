@@ -48,27 +48,25 @@
                         <hr class="mt-2 mb-6">
 
                         <div class="post-list">
-                            <template v-if="activeTab === 'posts'">
-                                <template v-if="loadingPosts"> <p>Cargando publicaciones...</p> </template>
-                                <template v-else-if="posts.length === 0">
-                                    <p>sin Publicaciones :(</p>
-                                </template>
-                                <template v-else>
-                                    <Post v-for="post in posts" :key="post.id" :post="post" />
-                                </template>
+                        <template v-if="activeTab === 'posts'">
+                            <template v-if="loadingPosts"> <p>Cargando publicaciones...</p> </template>
+                            <template v-else-if="posts.length === 0">
+                                <p>sin Publicaciones :(</p>
                             </template>
-
-                            <template v-if="activeTab === 'replies'">
-                                <template v-if="loadingReplies"> <p>Cargando respuestas...</p> </template>
-                                <template v-else-if="replies.length === 0">
-                                    <p>sin Respuestas :(</p>
-                                </template>
-                                <template v-else>
-                                    <Reply v-for="r in replies" :key="r.id" :reply="r" />
-                                </template>
+                            <template v-else>
+                                <Post v-for="post in posts" :key="post.id" :post="post" @post-deleted="handlePostDeleted" />
                             </template>
+                        </template>
 
-                            <template v-if="activeTab === 'likes'">
+                        <template v-if="activeTab === 'replies'">
+                            <template v-if="loadingReplies"> <p>Cargando respuestas...</p> </template>
+                            <template v-else-if="replies.length === 0">
+                                <p>sin Respuestas :(</p>
+                            </template>
+                            <template v-else>
+                                <Reply v-for="r in replies" :key="r.id" :reply="r" @reply-deleted="handleReplyDeleted" />
+                            </template>
+                        </template>                            <template v-if="activeTab === 'likes'">
                                 <template v-if="loadingLikes"> <p>Cargando likes...</p> </template>
                                 <template v-else-if="likedPosts.length === 0">
                                     <p>No hay likes todavía.</p>
@@ -173,4 +171,17 @@
         { immediate: true }
     )
 
+    const handlePostDeleted = (postId) => {
+        const index = posts.value.findIndex(p => p.id === postId);
+        if (index !== -1) {
+            posts.value.splice(index, 1);
+        }
+    };
+
+    const handleReplyDeleted = (replyId) => {
+        const index = replies.value.findIndex(r => r.id === replyId);
+        if (index !== -1) {
+            replies.value.splice(index, 1);
+        }
+    };
 </script>
