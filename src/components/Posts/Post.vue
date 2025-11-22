@@ -1,6 +1,5 @@
 <template>
-
-    <div class="bg-white rounded-xl shadow-sm border border-gray-200 mb-4 overflow-hidden transition-all duration-300 hover:shadow-md w-full">
+    <div class="max-w-2xl bg-white rounded-xl shadow-sm border border-gray-200 mb-4 overflow-hidden transition-all duration-300 hover:shadow-md w-full">
         <div class="p-4">
             <div class="flex items-start justify-between">
                 <div class="text-sm font-semibold text-gray-900">

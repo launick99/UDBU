@@ -25,7 +25,7 @@ export function useReplyCreation(user, parentPostId) {
      * Valida que hay contenido o archivo para enviar
      */
     const canSubmit = computed(() => {
-        return (newReply.value.content && newReply.value.content.trim().length > 0) || newReply.value.file !== null;
+        return newReply.value.content && newReply.value.content.trim().length > 0;
     });
 
     /**
@@ -60,6 +60,13 @@ export function useReplyCreation(user, parentPostId) {
             return;
         }
 
+        // Validar que content no sea null o vacío
+        const contentText = newReply.value.content ? newReply.value.content.trim() : "";
+        if (!contentText) {
+            errorMessage.value = "El contenido de la respuesta no puede estar vacío.";
+            return;
+        }
+
         try {
             loading.value = true;
 
@@ -73,7 +80,7 @@ export function useReplyCreation(user, parentPostId) {
 
             const replyData = await createReply({ 
                 sender_id: user.value.id, 
-                content: newReply.value.content,
+                content: contentText,
                 parent_post_id: parentPostId
             });
 

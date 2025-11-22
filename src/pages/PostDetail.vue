@@ -61,7 +61,7 @@
                                 <input type="file" class="hidden" accept="image/*" @change="handleFileChange" :disabled="submitting">
                             </label>
                         </div>
-                        <button :disabled="!canSubmit || submitting" type="submit" :class="['btn-primary', (canSubmit && submitting) ? 'disabled' : '']">
+                        <button :disabled="!canSubmit || submitting" type="submit" :class="['btn-primary', (!canSubmit || submitting) ? 'disabled' : '']">
                             <span v-if="submitting">Enviando...</span>
                             <span v-else>Responder</span>
                         </button>
