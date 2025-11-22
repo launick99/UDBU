@@ -1,13 +1,14 @@
-import { ref, onMounted, onUnmounted } from 'vue';
+import { ref, onMounted, onUnmounted, watch } from 'vue';
 import { fetchPostReplies, subscribeToPostReplies, fetchReply } from '../services/replies';
 
 /**
  * Composable para obtener y mantener sincronizado un listado de respuestas.
  * 
- * @param {String} parentPostId - ID del post padre
- * @returns {Object} - Estados y métodos para gestionar respuestas
+ * @param {Ref<String> | String} parentPostId
  */
 export function useRepliesList(parentPostId) {
+    const parentId = ref(parentPostId);
+
     const replies = ref([]);
     const loading = ref(true);
     const errorMessage = ref("");
@@ -21,23 +22,20 @@ export function useRepliesList(parentPostId) {
         try {
             loading.value = true;
             errorMessage.value = "";
-            replies.value = await fetchPostReplies(parentPostId);
-            try {
-                await Promise.all(replies.value.map(async (r) => {
+            replies.value = await fetchPostReplies(parentId.value);
+            await Promise.all(
+                replies.value.map(async (r) => {
                     try {
                         const nested = await fetchPostReplies(r.id);
                         r.replies_count = Array.isArray(nested) ? nested.length : 0;
-                    } catch (e) {
+                    } catch {
                         r.replies_count = 0;
                     }
-                }));
-            } catch (e) {
-                console.error('[useRepliesList] Error inicializando replies_count en respuestas:', e);
-            }
-
+                })
+            );
         } catch (error) {
             errorMessage.value = error.message || "Error al cargar respuestas";
-            console.error("[useRepliesList.js loadReplies] Error al cargar respuestas:", error);
+            console.error("[useRepliesList loadReplies]", error);
         } finally {
             loading.value = false;
         }
@@ -48,25 +46,26 @@ export function useRepliesList(parentPostId) {
      */
     const subscribeToNewReplies = () => {
         try {
-            unsubscribe = subscribeToPostReplies(parentPostId, async (newReplyData) => {
+            unsubscribe = subscribeToPostReplies(parentId.value, async (newReplyData) => {
                 try {
                     const enrichedReply = await fetchReply(newReplyData.id);
-                    // inicializar contador de respuestas anidadas en la nueva reply
+
                     try {
                         const nested = await fetchPostReplies(enrichedReply.id);
                         enrichedReply.replies_count = Array.isArray(nested) ? nested.length : 0;
-                    } catch (e) {
+                    } catch {
                         enrichedReply.replies_count = 0;
                     }
+
                     replies.value.push(enrichedReply);
                 } catch (error) {
-                    console.error("Error enriching reply:", error);
+                    console.error("[Realtime enrich reply] Error:", error);
                     newReplyData.replies_count = 0;
                     replies.value.push(newReplyData);
                 }
             });
         } catch (error) {
-            console.error("[useRepliesList.js subscribeToNewReplies] Error al suscribirse a respuestas:", error);
+            console.error("[useRepliesList subscribeToNewReplies]", error);
         }
     };
 
@@ -75,9 +74,7 @@ export function useRepliesList(parentPostId) {
      */
     const removeReply = (replyId) => {
         const index = replies.value.findIndex(r => r.id === replyId);
-        if (index !== -1) {
-            replies.value.splice(index, 1);
-        }
+        if (index !== -1) replies.value.splice(index, 1);
     };
 
     /**
@@ -85,27 +82,27 @@ export function useRepliesList(parentPostId) {
      */
     const updateReply = (replyId, updatedData) => {
         const index = replies.value.findIndex(r => r.id === replyId);
-        if (index !== -1) {
-            replies.value[index] = { ...replies.value[index], ...updatedData };
-        }
+        if (index !== -1) replies.value[index] = { ...replies.value[index], ...updatedData };
     };
 
-    /**
-     * Recarga la lista de respuestas
-     */
     const refresh = async () => {
         await loadReplies();
     };
 
-    onMounted(async () => {
+    onMounted(() => {
+        loadReplies();
+        subscribeToNewReplies();
+    });
+
+    watch(parentId, async () => {
+        unsubscribe();
+        replies.value = [];
         await loadReplies();
         subscribeToNewReplies();
     });
 
     onUnmounted(() => {
-        if (unsubscribe) {
-            unsubscribe();
-        }
+        unsubscribe();
     });
 
     return {

@@ -17,7 +17,6 @@
                 <div class="mt-2">
                     <p class="text-gray-800 text-sm">{{ reply.content }}</p>
                 </div>
-
                 <div class="mt-2 -mx-3" v-if="hasMedia">
                     <img :src="getFileURL(reply.post_media[0].media, 'posts')" alt="Reply" class="w-full h-auto max-h-[300px] object-cover rounded">
                 </div>
@@ -40,17 +39,14 @@
 </template>
 
 <script setup>
-    import { ref, computed, onMounted } from 'vue';
+    import { ref, computed } from 'vue';
     import { getFileURL } from '../../services/storage';
     import { timeAgo } from '../../composables/useTimeAgo';
 
     const props = defineProps({ reply: { type: Object, required: true } });
-    const emit = defineEmits(['repliesLoaded']);
 
     const showReplies = ref(false);
     const nestedReplies = ref([]);
 
     const hasMedia = computed(() => Array.isArray(props.reply.post_media) && props.reply.post_media.length > 0);
-
-    onMounted(() => {});
 </script>

@@ -89,7 +89,7 @@
 </template>
 
 <script setup>
-    import { ref, computed, onMounted } from 'vue';
+    import { ref, computed, onMounted, watch } from 'vue';
     import { useRoute } from 'vue-router';
     import SideNavbarLeft from '../components/Navegation/SideNavbarLeft.vue';
     import SideNavbarRight from '../components/Navegation/SideNavbarRight.vue';
@@ -102,7 +102,7 @@
     import { timeAgo } from '../composables/useTimeAgo';
 
     const route = useRoute();
-    const postId = route.params.id;
+    const postId = ref(route.params.id);
 
     const { user } = useAuthUserState();
     const post = ref(null);
@@ -118,7 +118,7 @@
         handleFileChange,
         removePreview,
         handleSubmit: handleSubmitReplyComposable
-    } = useReplyCreation(user, postId);
+    } = useReplyCreation(user, postId.value);
 
     const {
         replies,
@@ -138,7 +138,7 @@
     const loadPost = async () => {
         try {
             loadingPost.value = true;
-            post.value = await fetchPost(postId);
+            post.value = await fetchPost(postId.value);
         } catch (error) {
             console.error("Error loading post:", error);
         } finally {
@@ -156,4 +156,13 @@
     onMounted(() => {
         loadPost();
     });
+
+    watch(
+        () => route.params.id,
+        (newId) => {
+            postId.value = newId;
+            loadPost();
+        },
+        { immediate: true }
+    );
 </script>
