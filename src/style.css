@@ -60,6 +60,14 @@ footer{
         hover:bg-teal-700 transition duration-300 z-10;
 }
 
+.btn-primary {
+    @apply px-4 py-1.5 rounded-lg text-sm font-medium transition-colors bg-blue-600 text-white hover:bg-blue-700;
+}
+
+.btn-primary.disabled {
+    @apply bg-gray-200 text-gray-400 cursor-not-allowed;
+}
+
 .rain {
     @apply absolute top-0 left-0 w-full h-full pointer-events-none;
     background-image: url('../public/img/lluvia.png');

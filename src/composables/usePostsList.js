@@ -1,9 +1,9 @@
 import { ref, onMounted, onUnmounted } from 'vue';
 import { fetchGlobalPost, fetchUserPost, subscribeToGlobalPostNewPosts, fetchPost } from '../services/posts';
+import { fetchPostReplies } from '../services/replies';
 
 /**
  * Composable para obtener y mantener sincronizado un listado de posts.
- * Maneja: carga inicial, suscripción a nuevos posts en tiempo real.
  * 
  * @param {String} userId - ID del usuario
  * @returns {Object} - Estados y métodos para gestionar posts
@@ -24,6 +24,19 @@ export function usePostsList() {
             errorMessage.value = "";
             posts.value = await fetchGlobalPost();
 
+            try {
+                await Promise.all(posts.value.map(async (p) => {
+                    try {
+                        const replies = await fetchPostReplies(p.id);
+                        p.replies_count = Array.isArray(replies) ? replies.length : 0;
+                    } catch (e) {
+                        p.replies_count = 0;
+                    }
+                }));
+            } catch (e) {
+                console.error('[usePostsList] Error inicializando replies_count:', e);
+            }
+
         } catch (error) {
             errorMessage.value = error.message || "Error al cargar posts";
             console.error("[usePostList.js loadPosts] Error al cargar posts:", error);
@@ -38,15 +51,28 @@ export function usePostsList() {
     const subscribeToNewPosts = () => {
         try {
             unsubscribe = subscribeToGlobalPostNewPosts(async (newPostData) => {
-                // El post que viene del tiempo real solo tiene los datos básicos
-                // Enriquecerlo con las relaciones (user_profile, post_media)
                 try {
-                    const enrichedPost = await fetchPost(newPostData.id);
-                    posts.value.unshift(enrichedPost);
-                } catch (error) {
-                    console.error("Error enriching post:", error);
-                    // Si falla la enumeración, al menos agregar el post sin relaciones
-                    posts.value.unshift(newPostData);
+                    if (!newPostData.parent_post_id) {
+                        try {
+                            const post = await fetchPost(newPostData.id);
+                            post.replies_count = post.replies_count || 0;
+                            posts.value.unshift(post);
+                        } catch (error) {
+                            console.error("Error enriching post:", error);
+                            newPostData.replies_count = 0;
+                            posts.value.unshift(newPostData);
+                        }
+                    } else {
+                        // Es una respuesta: actualizar el contador del post padre si está en la lista
+                        const parentId = newPostData.parent_post_id;
+                        const idx = posts.value.findIndex(p => p.id === parentId);
+                        if (idx !== -1) {
+                            if (typeof posts.value[idx].replies_count !== 'number') posts.value[idx].replies_count = 0;
+                            posts.value[idx].replies_count += 1;
+                        }
+                    }
+                } catch (e) {
+                    console.error('[usePostsList] Error manejando evento realtime:', e);
                 }
             });
         } catch (error) {

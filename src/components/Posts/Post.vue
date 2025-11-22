@@ -28,17 +28,17 @@
             </div>
             <!-- Cantida de likes, comentarios -->
             <div class="mt-3 pt-2 border-t border-gray-100 flex justify-between text-xs text-gray-500">
-                <span>24 Me Gusta</span><span>2 Comentarios</span>
+                <span>24 Me Gusta</span><span>{{ post.replies_count || 0 }} Comentarios</span>
             </div>
             <div class="mt-2 pt-2 border-t border-gray-100 flex justify-between">
                 <button class="flex items-center justify-center w-1/3 py-2 text-sm font-medium rounded-lg transition-colors text-gray-500 hover:bg-gray-50">
                     <i class="fa-regular fa-heart text-gray-500 fa-xl w-8 mr-3"></i>
                     <span>Me Gusta</span>
                 </button>
-                <button class="flex items-center justify-center w-1/3 py-2 text-sm font-medium rounded-lg transition-colors text-gray-500 hover:bg-gray-50">
+                <RouterLink :to="`/post/${post.id}`" class="flex items-center justify-center w-1/3 py-2 text-sm font-medium rounded-lg transition-colors text-gray-500 hover:bg-gray-50">
                     <i class="fa-regular fa-comment text-gray-500 fa-xl w-8 mr-3"></i>
                     <span>Comentar</span>
-                </button>
+                </RouterLink>
                 <button class="flex items-center justify-center w-1/3 py-2 text-sm font-medium rounded-lg transition-colors text-gray-500 hover:bg-gray-50">
                     <i class="fa-regular fa-share-from-square text-gray-500 fa-xl w-8 mr-3"></i>
                     <span>Compartir</span>
@@ -51,6 +51,7 @@
 <script setup>
     import { computed } from 'vue';
     import { getFileURL } from '../../services/storage';
+    import { timeAgo } from '../../composables/useTimeAgo';
 
     const props = defineProps({
         post: {
@@ -63,34 +64,5 @@
         Array.isArray(props.post.post_media) && props.post.post_media.length > 0
     );
 
-    function timeAgo(date) {
-        const ahora = new Date();
-        const fechaPost = new Date(date);
-        const dif = (ahora - fechaPost) / 1000; //saco segundos de diferencia
-
-        if (dif < 30) { //menos de 30 segundos es justo ahora
-            return 'justo ahora';
-        }
-        else if (dif < 60) {
-            const segundos = Math.floor(dif);
-            return `hace ${segundos} segundo${segundos !== 1 ? 's' : ''}`;
-            //si es mayor a 1, agrego una s, para que diga segundos o segundo, hago lo mismo en los otros
-        }
-        else if (dif < 3600) {
-            const minutos = Math.floor(dif / 60);
-            return `hace ${minutos} minuto${minutos !== 1 ? 's' : ''}`;
-        }
-        else if (dif < 86400) { // google
-            const horas = Math.floor(dif / 3600);
-            return `hace ${horas} hora${horas !== 1 ? 's' : ''}`;
-        }
-        else {
-            const dias = Math.floor(dif / 86400); //tambien google
-            //si es mas de no se cuantos dias, pongo la fecha
-            if (dias < 30) {
-                return `hace ${dias} día${dias !== 1 ? 's' : ''}`;
-            }
-            return fechaPost.toLocaleDateString() + ' ' + fechaPost.toLocaleTimeString();
-        }
-    }
+    if (typeof props.post.replies_count !== 'number') props.post.replies_count = 0;
 </script>

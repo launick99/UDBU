@@ -58,6 +58,7 @@
 <script setup>
     import Post from '../components/Posts/Post.vue'
     import { fetchUserPost } from '../services/posts'
+    import { fetchPostReplies } from '../services/replies'
     import { ref, watch } from 'vue';
     import { useAuthUserState } from '../composables/useAuthUserState';
     import { getFileURL } from '../services/storage';
@@ -68,11 +69,23 @@
     watch(() => user.value?.id,
         async (id) => {
             if (!id) return
-            try {
-                posts.value = await fetchUserPost(id)
-            } catch {
-                posts.value = []
-            }
+                try {
+                    posts.value = await fetchUserPost(id)
+                    try {
+                        await Promise.all(posts.value.map(async (p) => {
+                            try {
+                                const replies = await fetchPostReplies(p.id);
+                                p.replies_count = Array.isArray(replies) ? replies.length : 0;
+                            } catch (e) {
+                                p.replies_count = 0;
+                            }
+                        }));
+                    } catch (e) {
+                        console.error('[Profile.vue] Error inicializando replies_count:', e);
+                    }
+                } catch {
+                    posts.value = []
+                }
         },
         { immediate: true }
     )

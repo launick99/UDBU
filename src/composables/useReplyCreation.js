@@ -1,16 +1,17 @@
 import { ref, computed } from 'vue';
-import { postGlobalnNewPost } from '../services/posts';
+import { createReply } from '../services/replies';
 import { createPostMedia } from '../services/media';
-import { uploadFile, getFileURL } from '../services/storage';
+import { uploadFile } from '../services/storage';
 
 /**
- * Composable para crear posts con imagen opcional.
+ * Composable para crear respuestas con imagen opcional.
  * 
- * @param {Object} user - Objeto del usuario (debe tener id)
- * @returns {Object} - Estados y métodos para crear posts
+ * @param {Object} user - Objeto del usuario
+ * @param {String} parentPostId - ID del post al que se está respondiendo
+ * @returns {Object}
  */
-export function usePostCreation(user) {
-    const newPost = ref({
+export function useReplyCreation(user, parentPostId) {
+    const newReply = ref({
         content: null,
         file: null
     });
@@ -24,7 +25,7 @@ export function usePostCreation(user) {
      * Valida que hay contenido o archivo para enviar
      */
     const canSubmit = computed(() => {
-        return (newPost.value.content && newPost.value.content.trim().length > 0) || newPost.value.file !== null;
+        return (newReply.value.content && newReply.value.content.trim().length > 0) || newReply.value.file !== null;
     });
 
     /**
@@ -33,7 +34,7 @@ export function usePostCreation(user) {
     const handleFileChange = (event) => {
         const files = Array.from(event.target.files || []);
         const file = files.length > 0 ? files[0] : null;
-        newPost.value.file = file;
+        newReply.value.file = file;
 
         if (preview.value) URL.revokeObjectURL(preview.value);
         preview.value = file ? URL.createObjectURL(file) : null;
@@ -47,7 +48,7 @@ export function usePostCreation(user) {
     const removePreview = () => {
         if (preview.value) URL.revokeObjectURL(preview.value);
         preview.value = null;
-        newPost.value.file = null;
+        newReply.value.file = null;
     };
 
     const handleSubmit = async () => {
@@ -63,32 +64,33 @@ export function usePostCreation(user) {
             loading.value = true;
 
             let mediaFilename = null;
-            if (newPost.value.file) {
-                const file = newPost.value.file;
+            if (newReply.value.file) {
+                const file = newReply.value.file;
                 const ext = file.name.split('.').pop();
                 mediaFilename = `${user.value.id}/${crypto.randomUUID()}.${ext}`;
                 await uploadFile(mediaFilename, file, 'posts');
             }
 
-            const postData = await postGlobalnNewPost({ 
+            const replyData = await createReply({ 
                 sender_id: user.value.id, 
-                content: newPost.value.content 
+                content: newReply.value.content,
+                parent_post_id: parentPostId
             });
 
-            if (!postData || postData.length === 0) {
-                throw new Error("Error: No se pudo crear el post.");
+            if (!replyData || replyData.length === 0) {
+                throw new Error("Error: No se pudo crear la respuesta.");
             }
             if (mediaFilename) {
-                const postId = postData[0].id;
-                await createPostMedia(postId, mediaFilename);
+                const replyId = replyData[0].id;
+                await createPostMedia(replyId, mediaFilename);
             }
 
-            successMessage.value = "Post creado exitosamente.";
+            successMessage.value = "Respuesta creada exitosamente.";
             resetForm();
 
         } catch (error) {
-            errorMessage.value = error.message || "Error al crear el post.";
-            console.error("Error creating post:", error);
+            errorMessage.value = error.message || "Error al crear la respuesta.";
+            console.error("Error creating reply:", error);
         } finally {
             loading.value = false;
         }
@@ -98,22 +100,14 @@ export function usePostCreation(user) {
      * Limpia el formulario después de enviar
      */
     const resetForm = () => {
-        newPost.value.content = null;
-        newPost.value.file = null;
+        newReply.value.content = null;
+        newReply.value.file = null;
         if (preview.value) URL.revokeObjectURL(preview.value);
         preview.value = null;
     };
 
-    /**
-     * Función auxiliar para obtener URL pública de imagen
-     */
-    const getImageUrl = (filename) => {
-        if(!filename){return null;}
-        return getFileURL(filename, 'posts');
-    };
-
     return {
-        newPost,
+        newReply,
         preview,
         loading,
         errorMessage,
@@ -122,7 +116,6 @@ export function usePostCreation(user) {
         handleFileChange,
         removePreview,
         handleSubmit,
-        resetForm,
-        getImageUrl
+        resetForm
     };
 }

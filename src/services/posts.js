@@ -32,6 +32,7 @@ export async function postGlobalnNewPost({sender_id, content}) {
 
 /**
  * Trae todas las publicaciones globales, ordenadas por fecha (como twitter).
+ * Solo trae posts principales (sin parent_post_id).
  * Incluye la información del usuario y sus archivos de media asociados.
  *
  * @returns {Promise<Array>}
@@ -55,6 +56,7 @@ export async function fetchGlobalPost() {
                 updated_at
             )
         `)
+        .is('parent_post_id', null)
         .order('created_at', { ascending: false });
     
     if (error) {
@@ -66,7 +68,7 @@ export async function fetchGlobalPost() {
 }
 
 /**
- * Trae todas las publicaciones de un usuario.
+ * Trae todas las publicaciones de un usuario (solo posts principales).
  *
  * @param {string} id
  * @returns {Promise<Array<Object>>} - Lista de publicaciones del usuario.
@@ -91,6 +93,7 @@ export async function fetchUserPost(id) {
             )
         `)
         .eq('sender_id', id)
+        .is('parent_post_id', null)
         .order('created_at', { ascending: false });
     
     if (error) {

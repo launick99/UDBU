@@ -3,6 +3,7 @@ import { createRouter, createWebHashHistory } from "vue-router";
 // Importaciones de páginas principales
 import Home from "../pages/Home.vue";
 import Posts from "../pages/Posts.vue";
+import PostDetail from "../pages/PostDetail.vue";
 import Login from "../pages/Login.vue";
 import Register from "../pages/Register.vue";
 import Profile from "../pages/Profile.vue";
@@ -26,7 +27,8 @@ const routes = [
     { component: Home,              path: '/',                      meta: { guest: true }           },
     { component: Login,             path: '/login',                 meta: { guest: true }           },
     { component: Register,          path: '/register',              meta: { guest: true }           },
-    { component: Posts,             path: '/post',                  meta: { requiresAuth: true }    },
+    { component: Posts,             path: '/posts',                 meta: { requiresAuth: true }    },
+    { component: PostDetail,        path: '/post/:id',              meta: { requiresAuth: true }    },
     { component: Profile,           path: '/perfil/',               meta: { requiresAuth: true }    },
     { component: User,              path: '/usuario/:id?',          meta: { requiresAuth: true }    },
     { component: ProfileEdit,       path: '/perfil/editar',         meta: { requiresAuth: true }    },
@@ -60,11 +62,11 @@ subscribeToAuthStateChanges((UserState) => user = UserState);
 /**
  * Guard global de navegación.
  * Si la ruta requiere autenticación y el usuario no está autenticado, redirige a /403.
- * Si la ruta es para invitados y el usuario está autenticado, redirige a /post.
+ * Si la ruta es para invitados y el usuario está autenticado, redirige a /posts.
  */
 router.beforeEach((to, from) => {
     if (to.meta.guest && user.id !== null) {
-        return { path: '/post' };
+        return { path: '/posts' };
     }
     if (to.meta.requiresAuth && user.id === null) {
         return { path: '/403' };

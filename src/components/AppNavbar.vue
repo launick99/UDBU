@@ -4,7 +4,7 @@
             <div class="flex justify-between items-center">
                 <!-- Logo -->
                 <router-link to="/" class="flex items-center gap-2">
-                    <img class="h-10 object-cover" src="../../public/img/logo.png" title="Bajo la Paraguas azul de Debbie" alt="Bajo la Paraguas azul de Debbie Logo">
+                    <img class="h-10 object-cover" src="/img/logo.png" title="Bajo la Paraguas azul de Debbie" alt="Bajo la Paraguas azul de Debbie Logo">
                     <h1 class="sr-only md:not-sr-only text-white font-semibold text-lg sm:text-xl">Bajo la Paraguas azul de Debbie</h1>
                 </router-link>
                 <div class="sm:hidden">
@@ -15,7 +15,7 @@
                 <ul class="hidden sm:flex sm:items-center text-white">
                     <template v-if="user?.id">
                         <li>
-                            <router-link to="/post">Home</router-link>
+                            <router-link to="/posts">Home</router-link>
                         </li>
                         <li>
                             <router-link to="/perfil">Mi Perfil</router-link>
@@ -45,7 +45,7 @@
             <ul class="flex flex-col px-4 py-5 space-y-1 text-white">
                 <template v-if="user?.id">
                     <li>
-                        <router-link to="/post" @click="mobileMenuOpen = false">Home</router-link>
+                        <router-link to="/posts" @click="mobileMenuOpen = false">Home</router-link>
                     </li>
                     <li>
                         <router-link to="/perfil">Mi Perfil</router-link>
